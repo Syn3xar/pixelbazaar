@@ -206,8 +206,8 @@ export default function Home() {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 24px', height: '56px', background: '#050508', borderBottom: '1px solid #1a1a2e', flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
           <div style={{ fontFamily: "'Orbitron', sans-serif", fontWeight: 900, fontSize: '18px' }}>
-            <span style={{ color: '#784BA0' }}>PIXEL</span>
-            <span style={{ color: '#e0e0ff' }}>BAZAAR</span>
+            <span style={{ color: '#784BA0' }}>MILLION</span>
+            <span style={{ color: '#e0e0ff' }}>DOLLARBOARD</span>
             <span style={{ color: '#FF6B6B', fontSize: '10px', verticalAlign: 'super', marginLeft: '2px' }}>×10⁶</span>
           </div>
           <div style={{ width: '1px', height: '24px', background: '#1a1a2e' }} />

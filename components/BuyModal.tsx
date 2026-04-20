@@ -2,7 +2,7 @@
 import { useState, useRef, useCallback } from 'react'
 import Modal from './Modal'
 
-type Props = { x: number; y: number; onClose: () => void }
+type Props = { x: number; y: number; onClose: () => void; onSpecialName?: (name: string) => void }
 
 const BLOCK_OPTIONS = [
   { label: '1×1', size: 1, pixels: 1, price: 1, description: '1 pixel — single color dot', pricePerPx: '$1.00/px' },
@@ -16,7 +16,7 @@ const PALETTE = [
   '#A8FF78','#B721FF','#08AEEA','#333333','#888888','#cccccc',
 ]
 
-export default function BuyModal({ x, y, onClose }: Props) {
+export default function BuyModal({ x, y, onClose, onSpecialName }: Props) {
   const [step, setStep] = useState<'choose' | 'design' | 'details'>('choose')
   const [blockOption, setBlockOption] = useState(BLOCK_OPTIONS[0])
   const [pixels, setPixels] = useState<string[]>([])
@@ -274,7 +274,7 @@ export default function BuyModal({ x, y, onClose }: Props) {
       ].map(({ label, key, type, ph }) => (
         <div key={key} style={{ marginBottom: '14px' }}>
           <label style={{ display: 'block', fontSize: '10px', letterSpacing: '0.1em', color: '#666', marginBottom: '6px', textTransform: 'uppercase' }}>{label}</label>
-          <input type={type} value={(form as any)[key]} onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))} placeholder={ph} style={inp} />
+          <input type={type} value={(form as any)[key]} onChange={e => { const v = e.target.value; if (key === 'company' && onSpecialName) onSpecialName(v); setForm(f => ({ ...f, [key]: v })) }} placeholder={ph} style={inp} />
         </div>
       ))}
 

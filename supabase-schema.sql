@@ -1,95 +1,93 @@
--- ================================================================
--- PIXELBAZAAR — Database Schema
--- Run this entire file in: Supabase → SQL Editor → New Query → Run
--- ================================================================
+'use client'
+import { useEffect, useState } from 'react'
+import Modal from './Modal'
+import { Pixel } from '@/app/page'
 
--- 1. PIXELS table — stores every purchased pixel
-CREATE TABLE IF NOT EXISTS pixels (
-  id          BIGSERIAL PRIMARY KEY,
-  x           INTEGER NOT NULL,
-  y           INTEGER NOT NULL,
-  company     TEXT NOT NULL,
-  url         TEXT NOT NULL,
-  color       TEXT NOT NULL DEFAULT '#784BA0',
-  price       NUMERIC(10,2) NOT NULL DEFAULT 1.00,
-  owner_email TEXT NOT NULL,
-  created_at  TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(x, y)   -- one company per pixel coordinate
-);
+type Props = {
+  pixel?: Pixel; coord: [number, number]
+  onClose: () => void; onBuy: () => void
+  onStartAuction: (p: Pixel) => void; onBid: (p: Pixel) => void
+}
 
--- 2. AUCTIONS table — active and completed auctions
-CREATE TABLE IF NOT EXISTS auctions (
-  id            BIGSERIAL PRIMARY KEY,
-  pixel_x       INTEGER NOT NULL,
-  pixel_y       INTEGER NOT NULL,
-  seller_email  TEXT NOT NULL,
-  min_bid       NUMERIC(10,2) NOT NULL,
-  current_bid   NUMERIC(10,2),
-  winner_email  TEXT,
-  status        TEXT NOT NULL DEFAULT 'active', -- active | ended | cancelled
-  ends_at       TIMESTAMPTZ NOT NULL,
-  created_at    TIMESTAMPTZ DEFAULT NOW()
-);
+function fmtTime(s: number) {
+  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60
+  if (h > 0) return `${h}h ${m}m`
+  if (m > 0) return `${m}m ${sec}s`
+  return `${sec}s`
+}
 
--- 3. BIDS table — every bid placed on an auction
-CREATE TABLE IF NOT EXISTS bids (
-  id          BIGSERIAL PRIMARY KEY,
-  auction_id  BIGINT REFERENCES auctions(id),
-  bidder_name TEXT NOT NULL,
-  bidder_email TEXT NOT NULL,
-  amount      NUMERIC(10,2) NOT NULL,
-  created_at  TIMESTAMPTZ DEFAULT NOW()
-);
+export default function PixelPanel({ pixel, coord, onClose, onBuy, onStartAuction, onBid }: Props) {
+  const [timer, setTimer] = useState<number | null>(null)
+  const [x, y] = coord
 
--- 4. TRANSACTIONS table — platform revenue tracking
-CREATE TABLE IF NOT EXISTS transactions (
-  id              BIGSERIAL PRIMARY KEY,
-  type            TEXT NOT NULL,  -- 'pixel_purchase' | 'auction_bid' | 'auction_win'
-  amount          NUMERIC(10,2) NOT NULL,
-  platform_fee    NUMERIC(10,2) NOT NULL,
-  stripe_session  TEXT,
-  pixel_x         INTEGER,
-  pixel_y         INTEGER,
-  buyer_email     TEXT,
-  created_at      TIMESTAMPTZ DEFAULT NOW()
-);
+  useEffect(() => {
+    if (!pixel?.auction?.active) return
+    const tick = () => setTimer(Math.max(0, Math.floor((pixel.auction!.endTime - Date.now()) / 1000)))
+    tick(); const id = setInterval(tick, 1000)
+    return () => clearInterval(id)
+  }, [pixel])
 
--- 5. Enable Row Level Security (keeps data safe)
-ALTER TABLE pixels      ENABLE ROW LEVEL SECURITY;
-ALTER TABLE auctions    ENABLE ROW LEVEL SECURITY;
-ALTER TABLE bids        ENABLE ROW LEVEL SECURITY;
-ALTER TABLE transactions ENABLE ROW LEVEL SECURITY;
+  if (!pixel) return (
+    <Modal title={`Pixel [${x}, ${y}]`} onClose={onClose}>
+      <div style={{ textAlign: 'center', padding: '20px 0' }}>
+        <div style={{ fontSize: '48px', marginBottom: '16px' }}>◻</div>
+        <div style={{ color: '#666', fontSize: '12px', marginBottom: '24px' }}>This pixel is available for purchase</div>
+        <div style={{ color: '#e0e0ff', fontSize: '22px', marginBottom: '4px' }}>$1.00</div>
+        <div style={{ color: '#555', fontSize: '10px', marginBottom: '24px' }}>Platform keeps 10% fee</div>
+        <button onClick={onBuy} style={btnStyle('#784BA0', '#fff', '100%')}>Buy This Pixel</button>
+      </div>
+    </Modal>
+  )
 
--- 6. Public read access (anyone can see the pixel board)
-CREATE POLICY "Anyone can read pixels"
-  ON pixels FOR SELECT USING (true);
+  return (
+    <Modal title={`Pixel [${x}, ${y}]`} onClose={onClose}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+        <div style={{ width: '32px', height: '32px', background: pixel.color, borderRadius: '2px', flexShrink: 0 }} />
+        <div>
+          <div style={{ color: '#e0e0ff', fontWeight: 'bold', fontSize: '14px' }}>{pixel.company}</div>
+          <a href={pixel.url} target="_blank" rel="noopener noreferrer" style={{ color: '#784BA0', fontSize: '11px' }}>{pixel.url}</a>
+        </div>
+      </div>
 
-CREATE POLICY "Anyone can read auctions"
-  ON auctions FOR SELECT USING (true);
+      <div style={{ borderTop: '1px solid #1a1a2e', paddingTop: '16px', marginBottom: '16px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px' }}>
+          <span style={{ color: '#555' }}>Current Value</span>
+          <span style={{ color: '#e0e0ff' }}>${pixel.price.toFixed(2)}</span>
+        </div>
+      </div>
 
-CREATE POLICY "Anyone can read bids"
-  ON bids FOR SELECT USING (true);
+      {pixel.auction?.active ? (
+        <div style={{ background: '#0f0f1a', border: '1px solid #FF6B6B33', borderRadius: '2px', padding: '16px', marginBottom: '16px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
+            <span style={{ color: '#FF6B6B', fontSize: '11px' }}>⚡ Live Auction</span>
+            <span style={{ color: '#FF6B6B', fontSize: '12px' }}>{timer !== null ? fmtTime(timer) : '…'}</span>
+          </div>
+          <div style={{ color: '#555', fontSize: '10px', marginBottom: '4px' }}>CURRENT BID</div>
+          <div style={{ color: '#FFD700', fontSize: '20px', marginBottom: '12px' }}>${pixel.auction.currentBid.toFixed(2)}</div>
+          <div style={{ maxHeight: '80px', overflowY: 'auto', marginBottom: '12px' }}>
+            {[...pixel.auction.bids].reverse().map((b, i) => (
+              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: '#666', marginBottom: '4px' }}>
+                <span>{b.bidder}</span><span style={{ color: '#92FE9D' }}>${b.amount.toFixed(2)}</span>
+              </div>
+            ))}
+          </div>
+          <button onClick={() => onBid(pixel)} style={btnStyle('#1a5c35', '#92FE9D', '100%')}>
+            Place Bid (min ${pixel.auction.minNext.toFixed(2)})
+          </button>
+        </div>
+      ) : (
+        <button onClick={() => onStartAuction(pixel)} style={btnStyle('#8B0000', '#fff', '100%')}>
+          Start Auction for This Pixel
+        </button>
+      )}
+    </Modal>
+  )
+}
 
--- 7. Only server (service role) can write — protects against cheating
-CREATE POLICY "Service role can insert pixels"
-  ON pixels FOR INSERT WITH CHECK (true);
-
-CREATE POLICY "Service role can update pixels"
-  ON pixels FOR UPDATE USING (true);
-
-CREATE POLICY "Service role can insert auctions"
-  ON auctions FOR INSERT WITH CHECK (true);
-
-CREATE POLICY "Service role can update auctions"
-  ON auctions FOR UPDATE USING (true);
-
-CREATE POLICY "Service role can insert bids"
-  ON bids FOR INSERT WITH CHECK (true);
-
-CREATE POLICY "Service role can insert transactions"
-  ON transactions FOR INSERT WITH CHECK (true);
-
--- 8. Indexes for fast pixel lookups
-CREATE INDEX IF NOT EXISTS idx_pixels_xy ON pixels(x, y);
-CREATE INDEX IF NOT EXISTS idx_auctions_status ON auctions(status);
-CREATE INDEX IF NOT EXISTS idx_auctions_ends_at ON auctions(ends_at);
+function btnStyle(bg: string, color: string, width?: string) {
+  return {
+    background: bg, color, border: 'none', padding: '10px 20px', cursor: 'pointer',
+    fontFamily: "'Space Mono', monospace", fontSize: '12px', letterSpacing: '0.08em',
+    borderRadius: '2px', textTransform: 'uppercase' as const, width: width ?? 'auto',
+  }
+}

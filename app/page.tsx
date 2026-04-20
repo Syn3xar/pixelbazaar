@@ -106,26 +106,36 @@ export default function Home() {
     const endX = Math.min(GRID, startX + Math.ceil(W / pxSize) + 1)
     const endY = Math.min(GRID, startY + Math.ceil(H / pxSize) + 1)
 
-    // Grid lines
-    if (pxSize >= 2) {
-      const gridOpacity = pxSize >= 8 ? 0.25 : pxSize >= 4 ? 0.12 : 0.06
-      ctx.strokeStyle = `rgba(255,255,255,${gridOpacity})`
-      ctx.lineWidth = 0.5
-      const step = pxSize < 1 ? Math.ceil(10 / pxSize) : 1
-      for (let gx = startX; gx <= endX; gx += step) {
-        ctx.beginPath(); ctx.moveTo(offset.x + gx * pxSize, 0); ctx.lineTo(offset.x + gx * pxSize, H); ctx.stroke()
-      }
-      for (let gy = startY; gy <= endY; gy += step) {
-        ctx.beginPath(); ctx.moveTo(0, offset.y + gy * pxSize); ctx.lineTo(W, offset.y + gy * pxSize); ctx.stroke()
-      }
-    } else {
-      ctx.fillStyle = 'rgba(255,255,255,0.04)'
-      const step = Math.ceil(50 / Math.max(pxSize, 0.1))
-      for (let gx = startX; gx <= endX; gx += step) {
-        for (let gy = startY; gy <= endY; gy += step) {
-          ctx.fillRect(offset.x + gx * pxSize, offset.y + gy * pxSize, 1, 1)
-        }
-      }
+    // Board boundary — always visible purple border
+    const boardX = offset.x
+    const boardY = offset.y
+    const boardW = GRID * pxSize
+    const boardH = GRID * pxSize
+
+    // Darken area outside the board
+    ctx.fillStyle = 'rgba(0,0,0,0.55)'
+    if (boardX > 0) ctx.fillRect(0, 0, boardX, H)
+    if (boardX + boardW < W) ctx.fillRect(boardX + boardW, 0, W - (boardX + boardW), H)
+    if (boardY > 0) ctx.fillRect(boardX, 0, boardW, boardY)
+    if (boardY + boardH < H) ctx.fillRect(boardX, boardY + boardH, boardW, H - (boardY + boardH))
+
+    // Purple board border
+    ctx.strokeStyle = 'rgba(120,75,160,0.8)'
+    ctx.lineWidth = 2
+    ctx.strokeRect(boardX, boardY, boardW, boardH)
+
+    // Grid lines — always visible, opacity scales with zoom
+    const gridOpacity = pxSize >= 8 ? 0.2 : pxSize >= 2 ? 0.08 : pxSize >= 0.5 ? 0.04 : 0.02
+    ctx.strokeStyle = `rgba(255,255,255,${gridOpacity})`
+    ctx.lineWidth = 0.5
+    const gridStep = pxSize < 0.3 ? Math.ceil(200 / pxSize) : pxSize < 1 ? Math.ceil(30 / pxSize) : pxSize < 3 ? Math.ceil(5 / pxSize) : 1
+    for (let gx = startX; gx <= endX; gx += gridStep) {
+      const sx = offset.x + gx * pxSize
+      ctx.beginPath(); ctx.moveTo(sx, Math.max(0, boardY)); ctx.lineTo(sx, Math.min(H, boardY + boardH)); ctx.stroke()
+    }
+    for (let gy = startY; gy <= endY; gy += gridStep) {
+      const sy = offset.y + gy * pxSize
+      ctx.beginPath(); ctx.moveTo(Math.max(0, boardX), sy); ctx.lineTo(Math.min(W, boardX + boardW), sy); ctx.stroke()
     }
 
     // Draw owned pixels
@@ -149,33 +159,55 @@ export default function Home() {
     if (mode === 'buy' && hoverCoord) {
       const [hx, hy] = hoverCoord
       const size = selectedBlockSize.size
-      const free = isBlockFree(hx, hy, size)
+
+      // Check if block is outside the board boundary
+      const outOfBounds = hx < 0 || hy < 0 || hx + size > GRID || hy + size > GRID
+      const free = !outOfBounds && isBlockFree(hx, hy, size)
+
+      const clampX = Math.max(0, Math.min(hx, GRID - size))
+      const clampY = Math.max(0, Math.min(hy, GRID - size))
+      const drawX = outOfBounds ? clampX : hx
+      const drawY = outOfBounds ? clampY : hy
+
       const blockW = size * pxSize
       const blockH = size * pxSize
-      const sx = offset.x + hx * pxSize
-      const sy = offset.y + hy * pxSize
+      const sx = offset.x + drawX * pxSize
+      const sy = offset.y + drawY * pxSize
 
-      // Fill overlay
-      ctx.fillStyle = free ? 'rgba(78,205,196,0.25)' : 'rgba(255,107,107,0.35)'
-      ctx.fillRect(sx, sy, blockW, blockH)
+      // Fill overlay: green=free, red=taken, orange=out of bounds
+      if (outOfBounds) {
+        ctx.fillStyle = 'rgba(255,165,0,0.2)'
+        ctx.fillRect(sx, sy, blockW, blockH)
+        ctx.strokeStyle = '#FFA500'
+      } else if (free) {
+        ctx.fillStyle = 'rgba(78,205,196,0.25)'
+        ctx.fillRect(sx, sy, blockW, blockH)
+        ctx.strokeStyle = '#4ECDC4'
+      } else {
+        ctx.fillStyle = 'rgba(255,107,107,0.3)'
+        ctx.fillRect(sx, sy, blockW, blockH)
+        ctx.strokeStyle = '#FF6B6B'
+      }
 
       // Border
-      ctx.strokeStyle = free ? '#4ECDC4' : '#FF6B6B'
-      ctx.lineWidth = Math.max(1.5, pxSize * 0.05)
+      ctx.lineWidth = Math.max(2, pxSize * 0.05)
       ctx.strokeRect(sx, sy, blockW, blockH)
 
-      // Label in the center of the block
-      if (blockW > 40 && blockH > 20) {
-        const label = free
-          ? `$${selectedBlockSize.price} — Click to buy`
-          : 'Taken — move your mouse'
-        ctx.font = `bold ${Math.min(14, Math.max(8, pxSize * 1.2))}px monospace`
+      // Label inside block when big enough
+      if (blockW > 50 && blockH > 22) {
+        const label = outOfBounds
+          ? 'Outside board boundary'
+          : free
+            ? `$${selectedBlockSize.price} — Click to buy`
+            : 'Taken — move to find a free spot'
+        const fontSize = Math.min(13, Math.max(8, pxSize))
+        ctx.font = `bold ${fontSize}px monospace`
         ctx.textAlign = 'center'
         ctx.textBaseline = 'middle'
-        ctx.fillStyle = free ? 'rgba(0,0,0,0.7)' : 'rgba(0,0,0,0.7)'
         const tw = ctx.measureText(label).width
-        ctx.fillRect(sx + blockW/2 - tw/2 - 6, sy + blockH/2 - 10, tw + 12, 20)
-        ctx.fillStyle = free ? '#4ECDC4' : '#FF6B6B'
+        ctx.fillStyle = 'rgba(0,0,0,0.75)'
+        ctx.fillRect(sx + blockW/2 - tw/2 - 6, sy + blockH/2 - fontSize/2 - 4, tw + 12, fontSize + 8)
+        ctx.fillStyle = outOfBounds ? '#FFA500' : free ? '#4ECDC4' : '#FF6B6B'
         ctx.fillText(label, sx + blockW/2, sy + blockH/2)
         ctx.textAlign = 'left'
         ctx.textBaseline = 'alphabetic'
@@ -247,12 +279,13 @@ export default function Home() {
       if (gx < 0 || gx >= GRID || gy < 0 || gy >= GRID) return
 
       if (mode === 'buy') {
-        // In buy mode — check if block is free and open buy modal
-        if (isBlockFree(gx, gy, selectedBlockSize.size)) {
+        // In buy mode — check bounds first, then if free
+        const outOfBounds = gx < 0 || gy < 0 || gx + selectedBlockSize.size > GRID || gy + selectedBlockSize.size > GRID
+        if (!outOfBounds && isBlockFree(gx, gy, selectedBlockSize.size)) {
           setSelectedCoord([gx, gy])
           setModal('buy')
         }
-        // If not free, do nothing (red overlay already shown)
+        // If taken or out of bounds — do nothing (overlay already shows feedback
       } else {
         // Browse mode — open pixel info panel
         setSelectedCoord([gx, gy])
@@ -399,21 +432,29 @@ export default function Home() {
           )}
 
           {/* Buy mode status bar at bottom */}
-          {mode === 'buy' && hoverCoord && (
-            <div style={{
-              position: 'absolute', bottom: '16px', left: '50%', transform: 'translateX(-50%)',
-              background: 'rgba(5,5,8,0.92)', border: `1px solid ${isBlockFree(hoverCoord[0], hoverCoord[1], selectedBlockSize.size) ? '#4ECDC4' : '#FF6B6B'}`,
-              borderRadius: '2px', padding: '8px 20px', fontSize: '11px', pointerEvents: 'none',
-              display: 'flex', gap: '16px', alignItems: 'center',
-            }}>
-              <span style={{ color: '#444' }}>Position: [{hoverCoord[0]}, {hoverCoord[1]}]</span>
-              <span style={{ color: '#444' }}>Block: {selectedBlockSize.label}</span>
-              {isBlockFree(hoverCoord[0], hoverCoord[1], selectedBlockSize.size)
-                ? <span style={{ color: '#4ECDC4' }}>✓ Available — click to buy for ${selectedBlockSize.price}</span>
-                : <span style={{ color: '#FF6B6B' }}>✗ Taken — move to find a free spot</span>
-              }
-            </div>
-          )}
+          {mode === 'buy' && hoverCoord && (() => {
+            const hx = hoverCoord[0], hy = hoverCoord[1], sz = selectedBlockSize.size
+            const outOfBounds = hx < 0 || hy < 0 || hx + sz > GRID || hy + sz > GRID
+            const free = !outOfBounds && isBlockFree(hx, hy, sz)
+            const borderColor = outOfBounds ? '#FFA500' : free ? '#4ECDC4' : '#FF6B6B'
+            return (
+              <div style={{
+                position: 'absolute', bottom: '16px', left: '50%', transform: 'translateX(-50%)',
+                background: 'rgba(5,5,8,0.92)', border: `1px solid ${borderColor}`,
+                borderRadius: '2px', padding: '8px 20px', fontSize: '11px', pointerEvents: 'none',
+                display: 'flex', gap: '16px', alignItems: 'center', whiteSpace: 'nowrap',
+              }}>
+                <span style={{ color: '#444' }}>Position: [{hx}, {hy}]</span>
+                <span style={{ color: '#444' }}>Block: {selectedBlockSize.label}</span>
+                {outOfBounds
+                  ? <span style={{ color: '#FFA500' }}>⚠ Outside board boundary — move inside</span>
+                  : free
+                    ? <span style={{ color: '#4ECDC4' }}>✓ Available — click to buy for ${selectedBlockSize.price}</span>
+                    : <span style={{ color: '#FF6B6B' }}>✗ Taken — move to find a free spot</span>
+                }
+              </div>
+            )
+          })()}
         </div>
       </div>
 

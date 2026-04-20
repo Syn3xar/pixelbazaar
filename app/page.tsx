@@ -88,14 +88,29 @@ export default function Home() {
     const endX = Math.min(GRID, startX + Math.ceil(W / pxSize) + 1)
     const endY = Math.min(GRID, startY + Math.ceil(H / pxSize) + 1)
 
-    if (pxSize >= 8) {
-      ctx.strokeStyle = '#111118'
+    // Draw grid at all zoom levels — faint at low zoom, more visible when zoomed in
+    if (pxSize >= 2) {
+      const gridOpacity = pxSize >= 8 ? 0.25 : pxSize >= 4 ? 0.12 : 0.06
+      ctx.strokeStyle = `rgba(255,255,255,${gridOpacity})`
       ctx.lineWidth = 0.5
-      for (let gx = startX; gx <= endX; gx++) {
+
+      // At low zoom, draw every Nth line to avoid overdrawing millions of lines
+      const step = pxSize < 1 ? Math.ceil(10 / pxSize) : 1
+
+      for (let gx = startX; gx <= endX; gx += step) {
         ctx.beginPath(); ctx.moveTo(offset.x + gx * pxSize, 0); ctx.lineTo(offset.x + gx * pxSize, H); ctx.stroke()
       }
-      for (let gy = startY; gy <= endY; gy++) {
+      for (let gy = startY; gy <= endY; gy += step) {
         ctx.beginPath(); ctx.moveTo(0, offset.y + gy * pxSize); ctx.lineTo(W, offset.y + gy * pxSize); ctx.stroke()
+      }
+    } else {
+      // At extreme zoom out, draw a subtle dot grid pattern instead
+      ctx.fillStyle = 'rgba(255,255,255,0.04)'
+      const step = Math.ceil(50 / Math.max(pxSize, 0.1))
+      for (let gx = startX; gx <= endX; gx += step) {
+        for (let gy = startY; gy <= endY; gy += step) {
+          ctx.fillRect(offset.x + gx * pxSize, offset.y + gy * pxSize, 1, 1)
+        }
       }
     }
 

@@ -670,7 +670,7 @@ export default function Home() {
                   <span style={{ color: '#444', fontSize: '9px' }}>{(bs.size * bs.size).toLocaleString()} pixels</span>
                 </button>
               ))}
-              <div style={{ marginTop: '12px', background: '#0a0a14', border: '1px solid #1a1a2e', borderRadius: '2px', padding: '10px', fontSize: '10px', color: '#555', lineHeight: 1.7, color: '#888' }}>
+              <div style={{ marginTop: '12px', background: '#0a0a14', border: '1px solid #1a1a2e', borderRadius: '2px', padding: '10px', fontSize: '10px', color: '#888', lineHeight: 1.7 }}>
                 <div style={{ color: '#4ECDC4', marginBottom: '6px', fontWeight: 'bold' }}>How to buy:</div>
                 <div>1. Pick block size above</div>
                 <div>2. Hover board to preview</div>
@@ -683,7 +683,7 @@ export default function Home() {
           )}
 
           {mode === 'browse' && (
-            <div style={{ marginTop: '12px', background: '#0a0a14', border: '1px solid #1a1a2e', borderRadius: '2px', padding: '10px', fontSize: '10px', color: '#555', lineHeight: 1.7, color: '#888' }}>
+            <div style={{ marginTop: '12px', background: '#0a0a14', border: '1px solid #1a1a2e', borderRadius: '2px', padding: '10px', fontSize: '10px', color: '#888', lineHeight: 1.7 }}>
               <div>🖱 Scroll to zoom</div>
               <div>✋ Drag to pan</div>
               <div>👆 Click pixel to inspect</div>

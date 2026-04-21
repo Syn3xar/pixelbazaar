@@ -713,6 +713,7 @@ export default function Home() {
           <div style={{ marginTop: 'auto', paddingTop: '20px', borderTop: '1px solid #1a1a2e', display: 'flex', flexDirection: 'column', gap: '6px' }}>
             {[
               { label: '⚡ Live Auctions', href: '/auctions' },
+              { label: '📬 Contact Us', href: '/contact' },
               { label: '🏆 Rankings', href: '/rankings' },
               { label: '🖼 My Pixels', href: '/my-pixels' },
               { label: 'Terms & Conditions', href: '/terms' },

@@ -39,7 +39,7 @@ export default function PrivacyPage() {
         },
         {
           title: '8. Your Rights',
-          content: 'You have the right to: request access to your personal data, request correction of inaccurate data, request deletion of your data (note: this may affect your pixel ownership), and withdraw consent where applicable. To exercise these rights, contact us through milliondotboard.com.'
+          content: 'You have the right to: request access to your personal data, request correction of inaccurate data, request deletion of your data (note: this may affect your pixel ownership), and withdraw consent where applicable. To exercise these rights, contact us at milliondotboard.com/contact.'
         },
         {
           title: '9. Data Security',
@@ -55,7 +55,7 @@ export default function PrivacyPage() {
         },
         {
           title: '12. Contact Us',
-          content: 'If you have any questions about this Privacy Policy or how we handle your data, please contact us through milliondotboard.com.'
+          content: 'If you have any questions about this Privacy Policy or how we handle your data, please contact us at milliondotboard.com/contact.'
         },
       ].map(({ title, content }) => (
         <div key={title} style={{ marginBottom: '32px' }}>

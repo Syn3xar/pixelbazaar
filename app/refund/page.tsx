@@ -27,7 +27,7 @@ export default function RefundPage() {
         },
         {
           title: '5. How to Request a Refund',
-          content: 'If you believe you qualify for a refund under Section 3, please contact us through milliondotboard.com within 7 days of your purchase. Include your email address, the pixel coordinates purchased, and the reason for your refund request. We will respond within 5 business days.'
+          content: 'If you believe you qualify for a refund under Section 3, please contact us at milliondotboard.com/contact within 7 days of your purchase. Include your email address, the pixel coordinates purchased, and the reason for your refund request. We will respond within 5 business days.'
         },
         {
           title: '6. Reselling Your Pixel',
@@ -43,7 +43,7 @@ export default function RefundPage() {
         },
         {
           title: '9. Contact',
-          content: 'For refund requests or questions about this policy, contact us through milliondotboard.com. We aim to respond to all inquiries within 5 business days.'
+          content: 'For refund requests or questions about this policy, contact us at milliondotboard.com/contact. We aim to respond to all inquiries within 5 business days.'
         },
       ].map(({ title, content }) => (
         <div key={title} style={{ marginBottom: '32px' }}>

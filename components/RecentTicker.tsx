@@ -75,7 +75,7 @@ export default function RecentTicker() {
           }
         `}</style>
         {items.map((p, i) => (
-          <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '0 24px', fontSize: '10px', color: '#555', flexShrink: 0 }}>
+          <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '0 24px', fontSize: '10px', color: '#aaa', flexShrink: 0 }}>
             <span style={{ display: 'inline-block', width: '8px', height: '8px', background: p.color, borderRadius: '1px', flexShrink: 0 }} />
             <span style={{ color: '#e0e0ff' }}>{p.company}</span>
             <span>bought</span>
@@ -84,7 +84,7 @@ export default function RecentTicker() {
             <span style={{ color: '#4ECDC4' }}>[{p.x},{p.y}]</span>
             <span>for</span>
             <span style={{ color: '#FFD700' }}>${p.price}</span>
-            <span style={{ color: '#2a2a3e', margin: '0 8px' }}>◆</span>
+            <span style={{ color: '#444', margin: '0 8px' }}>◆</span>
           </span>
         ))}
       </div>

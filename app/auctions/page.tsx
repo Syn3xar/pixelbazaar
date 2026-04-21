@@ -123,7 +123,7 @@ export default function AuctionsPage() {
           <span style={{ color: '#784BA0' }}>LIVE</span>
           <span style={{ color: '#e0e0ff' }}> AUCTIONS</span>
         </div>
-        <a href="/" style={{ color: '#555', fontSize: '11px', textDecoration: 'none' }}>← Back to Board</a>
+        <a href="/" style={{ color: '#999', fontSize: '11px', textDecoration: 'none' }}>← Back to Board</a>
       </div>
 
       {/* Tabs */}
@@ -186,13 +186,13 @@ export default function AuctionsPage() {
                     <div style={{ fontSize: '9px', color: '#444', letterSpacing: '0.1em', marginBottom: '12px', textTransform: 'uppercase' }}>
                       Bid History ({sortedBids.length})
                     </div>
-                    {sortedBids.length === 0 && <div style={{ color: '#444', fontSize: '11px' }}>No bids yet — be the first!</div>}
+                    {sortedBids.length === 0 && <div style={{ color: '#999', fontSize: '11px' }}>No bids yet — be the first!</div>}
                     <div style={{ maxHeight: '160px', overflowY: 'auto' }}>
                       {sortedBids.map((b, i) => (
                         <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0', borderBottom: '1px solid #0a0a14', fontSize: '11px' }}>
                           <div>
                             <span style={{ color: i === 0 ? '#FFD700' : '#e0e0ff' }}>{i === 0 ? '👑 ' : ''}{b.bidder_name}</span>
-                            <span style={{ color: '#444', fontSize: '9px', marginLeft: '8px' }}>{new Date(b.created_at).toLocaleTimeString()}</span>
+                            <span style={{ color: '#888', fontSize: '9px', marginLeft: '8px' }}>{new Date(b.created_at).toLocaleTimeString()}</span>
                           </div>
                           <span style={{ color: i === 0 ? '#FFD700' : '#92FE9D' }}>${Number(b.amount).toFixed(2)}</span>
                         </div>

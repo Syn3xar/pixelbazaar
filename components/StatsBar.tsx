@@ -20,7 +20,7 @@ export default function StatsBar({ pixelMap, revenue }: Props) {
     <div style={{ display: 'flex', background: '#050508', borderBottom: '1px solid #1a1a2e', flexWrap: 'wrap' }}>
       {stats.map(([label, val, color]) => (
         <div key={label} style={{ flex: 1, minWidth: '140px', padding: '14px 20px', borderRight: '1px solid #1a1a2e' }}>
-          <div style={{ fontSize: '9px', letterSpacing: '0.15em', color: '#444', marginBottom: '4px' }}>{label}</div>
+          <div style={{ fontSize: '9px', letterSpacing: '0.15em', color: '#888', marginBottom: '4px' }}>{label}</div>
           <div style={{ fontSize: '16px', color, fontFamily: "'Space Mono', monospace" }}>{val}</div>
         </div>
       ))}

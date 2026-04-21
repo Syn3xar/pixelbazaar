@@ -624,10 +624,14 @@ export default function Home() {
             <span style={{ color: '#FF6B6B', fontSize: '10px', verticalAlign: 'super', marginLeft: '2px' }}>×10⁶</span>
           </div>
           <div style={{ width: '1px', height: '24px', background: '#1a1a2e' }} />
-          <div style={{ fontSize: '10px', color: '#444', letterSpacing: '0.1em' }}>1,000,000 PIXEL MARKETPLACE</div>
+          <div style={{ fontSize: '10px', color: '#777', letterSpacing: '0.1em' }}>1,000,000 PIXEL MARKETPLACE</div>
+          <div style={{ width: '1px', height: '24px', background: '#1a1a2e' }} />
+          <div style={{ fontSize: '9px', color: '#444', letterSpacing: '0.06em' }}>
+            Last update: <span style={{ color: '#555' }}>Update.2.260421</span>
+          </div>
         </div>
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-          <span style={{ fontSize: '10px', color: '#444' }}>ZOOM: {zoom.toFixed(1)}×</span>
+          <span style={{ fontSize: '10px', color: '#888' }}>ZOOM: {zoom.toFixed(1)}×</span>
           {[['＋', 1.5], ['－', 1/1.5]].map(([label, f]) => (
             <button key={label as string} onClick={() => setZoom(z => Math.min(80, Math.max(0.3, z * (f as number))))}
               style={{ background: '#111118', border: '1px solid #2a2a3e', color: '#888', padding: '6px 12px', cursor: 'pointer', fontFamily: 'inherit', fontSize: '12px', borderRadius: '2px' }}>
@@ -648,26 +652,26 @@ export default function Home() {
 
         {/* Sidebar */}
         <div style={{ width: '200px', flexShrink: 0, background: '#050508', borderRight: '1px solid #1a1a2e', display: 'flex', flexDirection: 'column', padding: '16px 12px', gap: '8px', overflowY: 'auto' }}>
-          <div style={{ fontSize: '9px', letterSpacing: '0.15em', color: '#444', marginBottom: '4px', textTransform: 'uppercase' }}>Mode</div>
-          <button onClick={() => { setMode('browse'); setHoverCoord(null) }} style={{ padding: '8px', fontSize: '11px', cursor: 'pointer', borderRadius: '2px', fontFamily: 'inherit', textAlign: 'left', background: mode === 'browse' ? '#1a1a2e' : 'transparent', color: mode === 'browse' ? '#e0e0ff' : '#555', border: `1px solid ${mode === 'browse' ? '#784BA0' : '#1a1a2e'}` }}>
+          <div style={{ fontSize: '9px', letterSpacing: '0.15em', color: '#777', marginBottom: '4px', textTransform: 'uppercase' }}>Mode</div>
+          <button onClick={() => { setMode('browse'); setHoverCoord(null) }} style={{ padding: '8px', fontSize: '11px', cursor: 'pointer', borderRadius: '2px', fontFamily: 'inherit', textAlign: 'left', background: mode === 'browse' ? '#1a1a2e' : 'transparent', color: mode === 'browse' ? '#e0e0ff' : '#888', border: `1px solid ${mode === 'browse' ? '#784BA0' : '#1a1a2e'}` }}>
             🔍 Browse Board
           </button>
-          <button onClick={() => { setMode('buy'); setSelectedCoord(null) }} style={{ padding: '8px', fontSize: '11px', cursor: 'pointer', borderRadius: '2px', fontFamily: 'inherit', textAlign: 'left', background: mode === 'buy' ? '#784BA0' : 'transparent', color: mode === 'buy' ? '#fff' : '#555', border: `1px solid ${mode === 'buy' ? '#784BA0' : '#1a1a2e'}` }}>
+          <button onClick={() => { setMode('buy'); setSelectedCoord(null) }} style={{ padding: '8px', fontSize: '11px', cursor: 'pointer', borderRadius: '2px', fontFamily: 'inherit', textAlign: 'left', background: mode === 'buy' ? '#784BA0' : 'transparent', color: mode === 'buy' ? '#fff' : '#888', border: `1px solid ${mode === 'buy' ? '#784BA0' : '#1a1a2e'}` }}>
             🛒 Buy Pixels
           </button>
 
           {mode === 'buy' && (
             <>
-              <div style={{ fontSize: '9px', letterSpacing: '0.15em', color: '#444', marginTop: '12px', marginBottom: '4px', textTransform: 'uppercase' }}>Block Size</div>
+              <div style={{ fontSize: '9px', letterSpacing: '0.15em', color: '#777', marginTop: '12px', marginBottom: '4px', textTransform: 'uppercase' }}>Block Size</div>
               {BLOCK_SIZES.map(bs => (
                 <button key={bs.label} onClick={() => setSelectedBlockSize(bs)} style={{ padding: '10px 8px', fontSize: '11px', cursor: 'pointer', borderRadius: '2px', fontFamily: 'inherit', textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '3px', background: selectedBlockSize.size === bs.size ? '#111118' : 'transparent', border: `1px solid ${selectedBlockSize.size === bs.size ? bs.color : '#1a1a2e'}` }}>
-                  <span style={{ color: selectedBlockSize.size === bs.size ? bs.color : '#555', fontWeight: 'bold' }}>{bs.label}</span>
+                  <span style={{ color: selectedBlockSize.size === bs.size ? bs.color : '#aaa', fontWeight: 'bold' }}>{bs.label}</span>
                   <span style={{ color: '#FFD700', fontSize: '12px' }}>${bs.price}</span>
                   <span style={{ color: '#444', fontSize: '9px' }}>{(bs.size * bs.size).toLocaleString()} pixels</span>
                 </button>
               ))}
-              <div style={{ marginTop: '12px', background: '#0a0a14', border: '1px solid #1a1a2e', borderRadius: '2px', padding: '10px', fontSize: '10px', color: '#555', lineHeight: 1.7 }}>
-                <div style={{ color: '#4ECDC4', marginBottom: '4px' }}>How to buy:</div>
+              <div style={{ marginTop: '12px', background: '#0a0a14', border: '1px solid #1a1a2e', borderRadius: '2px', padding: '10px', fontSize: '10px', color: '#555', lineHeight: 1.7, color: '#888' }}>
+                <div style={{ color: '#4ECDC4', marginBottom: '6px', fontWeight: 'bold' }}>How to buy:</div>
                 <div>1. Pick block size above</div>
                 <div>2. Hover board to preview</div>
                 <div style={{ color: '#4ECDC4' }}>🟢 Green = available</div>
@@ -679,7 +683,7 @@ export default function Home() {
           )}
 
           {mode === 'browse' && (
-            <div style={{ marginTop: '12px', background: '#0a0a14', border: '1px solid #1a1a2e', borderRadius: '2px', padding: '10px', fontSize: '10px', color: '#555', lineHeight: 1.7 }}>
+            <div style={{ marginTop: '12px', background: '#0a0a14', border: '1px solid #1a1a2e', borderRadius: '2px', padding: '10px', fontSize: '10px', color: '#555', lineHeight: 1.7, color: '#888' }}>
               <div>🖱 Scroll to zoom</div>
               <div>✋ Drag to pan</div>
               <div>👆 Click pixel to inspect</div>
@@ -692,7 +696,7 @@ export default function Home() {
 
           {/* Pixel Tracker */}
           <div style={{ marginTop: '16px', borderTop: '1px solid #1a1a2e', paddingTop: '14px' }}>
-            <div style={{ fontSize: '9px', letterSpacing: '0.15em', color: '#444', marginBottom: '8px', textTransform: 'uppercase' }}>🎯 Pixel Tracker</div>
+            <div style={{ fontSize: '9px', letterSpacing: '0.15em', color: '#777', marginBottom: '8px', textTransform: 'uppercase' }}>🎯 Pixel Tracker</div>
             <PixelTracker onJump={(x, y) => {
               const canvas = canvasRef.current
               if (!canvas) return
@@ -716,13 +720,13 @@ export default function Home() {
               { label: 'Refund Policy', href: '/refund' },
             ].map(({ label, href }) => (
               <a key={href} href={href} target="_blank" rel="noopener noreferrer"
-                style={{ fontSize: '9px', color: '#444', textDecoration: 'none', letterSpacing: '0.08em' }}
+                style={{ fontSize: '9px', color: '#aaa', textDecoration: 'none', letterSpacing: '0.08em' }}
                 onMouseEnter={e => (e.currentTarget.style.color = '#784BA0')}
                 onMouseLeave={e => (e.currentTarget.style.color = '#444')}>
                 {label}
               </a>
             ))}
-            <div style={{ fontSize: '9px', color: '#2a2a3e', marginTop: '4px' }}>© 2026 MillionDotBoard</div>
+            <div style={{ fontSize: '9px', color: '#555', marginTop: '4px' }}>© 2026 MillionDotBoard</div>
           </div>
         </div>
 
@@ -757,7 +761,7 @@ export default function Home() {
               borderRadius: '2px',
               padding: '3px 7px',
               fontSize: '10px',
-              color: '#666',
+              color: '#aaa',
               pointerEvents: 'none',
               zIndex: 499,
               fontFamily: "'Space Mono', monospace",
@@ -775,8 +779,8 @@ export default function Home() {
             const borderColor = outOfBounds ? '#FFA500' : free ? '#4ECDC4' : '#FF6B6B'
             return (
               <div style={{ position: 'absolute', bottom: '16px', left: '50%', transform: 'translateX(-50%)', background: 'rgba(5,5,8,0.92)', border: `1px solid ${borderColor}`, borderRadius: '2px', padding: '8px 20px', fontSize: '11px', pointerEvents: 'none', display: 'flex', gap: '16px', alignItems: 'center', whiteSpace: 'nowrap' }}>
-                <span style={{ color: '#444' }}>Position: [{hx}, {hy}]</span>
-                <span style={{ color: '#444' }}>Block: {selectedBlockSize.label}</span>
+                <span style={{ color: '#aaa' }}>Position: [{hx}, {hy}]</span>
+                <span style={{ color: '#aaa' }}>Block: {selectedBlockSize.label}</span>
                 {outOfBounds
                   ? <span style={{ color: '#FFA500' }}>⚠ Outside board boundary — move inside</span>
                   : free

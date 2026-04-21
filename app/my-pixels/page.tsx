@@ -57,7 +57,7 @@ export default function MyPixelsPage() {
         <span style={{ color: '#784BA0' }}>MY</span>
         <span style={{ color: '#e0e0ff' }}> PIXELS</span>
       </div>
-      <p style={{ color: '#555', fontSize: '12px', marginBottom: '32px' }}>Enter your email to see all your pixel blocks</p>
+      <p style={{ color: '#aaa', fontSize: '12px', marginBottom: '32px' }}>Enter your email to see all your pixel blocks</p>
 
       {/* Search */}
       <div style={{ display: 'flex', gap: '8px', marginBottom: '32px' }}>

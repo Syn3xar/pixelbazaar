@@ -6,7 +6,7 @@ export default function TermsPage() {
       <a href="/" style={{ color: '#784BA0', fontSize: '12px', textDecoration: 'none', letterSpacing: '0.1em' }}>← Back to Board</a>
 
       <h1 style={{ fontSize: '24px', fontWeight: 700, margin: '32px 0 8px', color: '#fff', letterSpacing: '0.05em' }}>Terms & Conditions</h1>
-      <p style={{ color: '#555', fontSize: '12px', marginBottom: '40px' }}>Last updated: April 2026</p>
+      <p style={{ color: '#aaa', fontSize: '12px', marginBottom: '40px' }}>Last updated: April 2026</p>
 
       {[
         {
@@ -56,7 +56,7 @@ export default function TermsPage() {
       ].map(({ title, content }) => (
         <div key={title} style={{ marginBottom: '32px' }}>
           <h2 style={{ fontSize: '14px', fontWeight: 700, color: '#784BA0', marginBottom: '10px', letterSpacing: '0.05em' }}>{title}</h2>
-          <p style={{ fontSize: '13px', color: '#888', lineHeight: '1.8', margin: 0 }}>{content}</p>
+          <p style={{ fontSize: '13px', color: '#bbb', lineHeight: '1.8', margin: 0 }}>{content}</p>
         </div>
       ))}
 

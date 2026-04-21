@@ -69,7 +69,7 @@ export default function PixelTracker({ onJump, pixelMap }: Props) {
           {result === 'empty' && (
             <div style={{ color: '#4ECDC4' }}>
               <div style={{ marginBottom: '4px' }}>◻ Pixel [{xVal}, {yVal}]</div>
-              <div style={{ color: '#555' }}>Available for purchase</div>
+              <div style={{ color: '#aaa' }}>Available for purchase</div>
             </div>
           )}
           {result !== 'invalid' && result !== 'empty' && result && (

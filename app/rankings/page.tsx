@@ -54,7 +54,7 @@ export default function RankingsPage() {
           <span style={{ color: '#FFD700' }}>PIXEL</span>
           <span style={{ color: '#e0e0ff' }}> RANKINGS</span>
         </div>
-        <a href="/" style={{ color: '#555', fontSize: '11px', textDecoration: 'none' }}>← Back to Board</a>
+        <a href="/" style={{ color: '#999', fontSize: '11px', textDecoration: 'none' }}>← Back to Board</a>
       </div>
 
       {/* Tabs */}
@@ -97,7 +97,7 @@ export default function RankingsPage() {
                   <div style={{ width: '40px', height: '40px', background: b.color, borderRadius: '2px', margin: '0 auto 10px' }} />
                   <div style={{ color: '#e0e0ff', fontSize: '13px', fontWeight: 'bold', marginBottom: '4px' }}>{b.company}</div>
                   <div style={{ color: '#FFD700', fontSize: rank === 0 ? '20px' : '16px', fontWeight: 'bold' }}>${b.price.toFixed(2)}</div>
-                  <div style={{ color: '#555', fontSize: '9px', marginTop: '4px' }}>{b.block_size}×{b.block_size} block</div>
+                  <div style={{ color: '#888', fontSize: '9px', marginTop: '4px' }}>{b.block_size}×{b.block_size} block</div>
                 </div>
               )
             })}
@@ -123,12 +123,12 @@ export default function RankingsPage() {
                     <span>📅 {new Date(b.created_at).toLocaleDateString()}</span>
                   </div>
                 </div>
-                <a href={b.url} target="_blank" rel="noopener noreferrer" style={{ color: '#555', fontSize: '10px', textDecoration: 'none', marginRight: '12px' }}>
+                <a href={b.url} target="_blank" rel="noopener noreferrer" style={{ color: '#999', fontSize: '10px', textDecoration: 'none', marginRight: '12px' }}>
                   {b.url.replace('https://', '').replace('http://', '').slice(0, 20)}
                 </a>
                 <div style={{ textAlign: 'right', flexShrink: 0 }}>
                   <div style={{ color: '#FFD700', fontSize: '16px', fontWeight: 'bold' }}>${b.price.toFixed(2)}</div>
-                  <div style={{ color: '#555', fontSize: '9px' }}>{(b.block_size*b.block_size).toLocaleString()} pixels</div>
+                  <div style={{ color: '#888', fontSize: '9px' }}>{(b.block_size*b.block_size).toLocaleString()} pixels</div>
                 </div>
               </div>
             ))}

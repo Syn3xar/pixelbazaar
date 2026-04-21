@@ -125,7 +125,7 @@ export default function AdminPage() {
                 <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #111118', fontSize: '11px' }}>
                   <div>
                     <div style={{ color: '#e0e0ff' }}>{b.company}</div>
-                    <div style={{ color: '#555', fontSize: '9px' }}>[{b.origin_x},{b.origin_y}] · {b.block_size}×{b.block_size}</div>
+                    <div style={{ color: '#888', fontSize: '9px' }}>[{b.origin_x},{b.origin_y}] · {b.block_size}×{b.block_size}</div>
                   </div>
                   <div style={{ color: '#FFD700' }}>${b.price}</div>
                 </div>
@@ -135,7 +135,7 @@ export default function AdminPage() {
             {/* Top buyers */}
             <div style={{ background: '#0f0f1a', border: '1px solid #1a1a2e', borderRadius: '2px', padding: '20px' }}>
               <div style={{ fontSize: '10px', color: '#444', letterSpacing: '0.1em', marginBottom: '16px', textTransform: 'uppercase' }}>Top Buyers</div>
-              {stats.topBuyers.length === 0 && <div style={{ color: '#444', fontSize: '11px' }}>No purchases yet</div>}
+              {stats.topBuyers.length === 0 && <div style={{ color: '#999', fontSize: '11px' }}>No purchases yet</div>}
               {stats.topBuyers.map((b, i) => (
                 <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #111118', fontSize: '11px' }}>
                   <div style={{ color: '#e0e0ff' }}>#{i+1} {b.email}</div>
@@ -152,7 +152,7 @@ export default function AdminPage() {
               <thead>
                 <tr style={{ borderBottom: '1px solid #1a1a2e' }}>
                   {['Type', 'Amount', 'Platform Fee', 'Buyer', 'Date'].map(h => (
-                    <th key={h} style={{ textAlign: 'left', padding: '6px 8px', color: '#444', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{h}</th>
+                    <th key={h} style={{ textAlign: 'left', padding: '6px 8px', color: '#888', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{h}</th>
                   ))}
                 </tr>
               </thead>

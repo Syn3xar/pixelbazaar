@@ -110,3 +110,27 @@ CREATE INDEX idx_blocks_origin   ON blocks(origin_x, origin_y);
 CREATE INDEX idx_auctions_block  ON auctions(block_id);
 CREATE INDEX idx_auctions_status ON auctions(status);
 CREATE INDEX idx_auctions_ends   ON auctions(ends_at);
+
+-- ================================================================
+-- ACTIVITY LOG — comprehensive event tracking
+-- ================================================================
+CREATE TABLE IF NOT EXISTS activity_log (
+  id          BIGSERIAL PRIMARY KEY,
+  event_type  TEXT NOT NULL,  -- 'pixel_purchase' | 'auction_created' | 'bid_placed' | 'auction_won' | 'auction_ended'
+  block_id    BIGINT,
+  auction_id  BIGINT,
+  actor_email TEXT,
+  actor_name  TEXT,
+  amount      NUMERIC(10,2),
+  metadata    JSONB,          -- any extra info: coordinates, block size, company, etc
+  ip_address  TEXT,
+  user_agent  TEXT,
+  created_at  TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE activity_log ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "read activity"  ON activity_log FOR SELECT USING (true);
+CREATE POLICY "write activity" ON activity_log FOR INSERT WITH CHECK (true);
+CREATE INDEX idx_activity_type ON activity_log(event_type);
+CREATE INDEX idx_activity_date ON activity_log(created_at);
+CREATE INDEX idx_activity_block ON activity_log(block_id);

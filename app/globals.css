@@ -2,7 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
-* { box-sizing: border-box; }
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Orbitron:wght@400;700;900&display=swap');
+
+* {
+  box-sizing: border-box;
+}
 
 body {
   background: #08080f;
@@ -13,8 +17,22 @@ body {
   overflow: hidden;
 }
 
-::-webkit-scrollbar { width: 4px; height: 4px; }
-::-webkit-scrollbar-track { background: #0a0a0f; }
-::-webkit-scrollbar-thumb { background: #2a2a3e; border-radius: 2px; }
-input[type="color"] { cursor: pointer; }
-canvas { display: block; }
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: #0a0a0f;
+}
+::-webkit-scrollbar-thumb {
+  background: #2a2a3e;
+  border-radius: 2px;
+}
+
+input[type="color"] {
+  cursor: pointer;
+}
+
+canvas {
+  display: block;
+}

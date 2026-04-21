@@ -90,6 +90,24 @@ export default function Home() {
     return () => clearInterval(id)
   }, [])
 
+  // EE11: Pixel of the day
+  const [pixelOfDay, setPixelOfDay] = useState<string|null>(null)
+  useEffect(() => {
+    // Pick a "pixel of the day" based on date seed
+    const seed = new Date().toDateString()
+    const hash = seed.split('').reduce((a, c) => a + c.charCodeAt(0), 0)
+    const keys = Object.keys(pixelMap)
+    if (keys.length > 0) {
+      const key = keys[hash % keys.length]
+      const p = pixelMap[key]
+      if (p) {
+        setPixelOfDay(key)
+        // Flash it after 2 seconds
+        setTimeout(() => showEasterMsg(`⭐ Pixel of the Day: ${p.company} at [${p.x}, ${p.y}]!`, 5000), 2000)
+      }
+    }
+  }, [pixelMap])
+
   // EE4: 100% sold fireworks
   const [fireworks, setFireworks]   = useState(false)
   const [confetti, setConfetti]     = useState(false)  // EE10: special name confetti
@@ -407,6 +425,19 @@ export default function Home() {
       }
     }
 
+    // EE11: Pixel of the day highlight
+    if (pixelOfDay && pxSize >= 2) {
+      const [pdx, pdy] = pixelOfDay.split(',').map(Number)
+      if (pdx >= startX && pdx < endX && pdy >= startY && pdy < endY) {
+        const pdsx = offset.x + pdx * pxSize
+        const pdsy = offset.y + pdy * pxSize
+        const glow = 0.5 + 0.5 * Math.sin(Date.now() / 400)
+        ctx.strokeStyle = `rgba(255,215,0,${glow})`
+        ctx.lineWidth = Math.max(2, pxSize * 0.1)
+        ctx.strokeRect(pdsx - 1, pdsy - 1, pxSize + 2, pxSize + 2)
+      }
+    }
+
     if (mode === 'browse' && selectedCoord) {
       const px = offset.x + selectedCoord[0] * pxSize
       const py = offset.y + selectedCoord[1] * pxSize
@@ -677,6 +708,8 @@ export default function Home() {
           {/* Footer links */}
           <div style={{ marginTop: 'auto', paddingTop: '20px', borderTop: '1px solid #1a1a2e', display: 'flex', flexDirection: 'column', gap: '6px' }}>
             {[
+              { label: '⚡ Live Auctions', href: '/auctions' },
+              { label: '🏆 Rankings', href: '/rankings' },
               { label: '🖼 My Pixels', href: '/my-pixels' },
               { label: 'Terms & Conditions', href: '/terms' },
               { label: 'Privacy Policy', href: '/privacy' },

@@ -81,7 +81,7 @@ export default function BuyModal({ x, y, onClose, onSpecialName }: Props) {
     if (!form.company.trim() || !form.url.trim() || !form.email.trim()) return alert('Please fill in all fields')
     setLoading(true)
     try {
-      const res = await fetch('/api/checkout', {
+      const res = await fetch('/api/paddle/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -298,7 +298,7 @@ export default function BuyModal({ x, y, onClose, onSpecialName }: Props) {
           ← Back
         </button>
         <button onClick={handleSubmit} disabled={loading} style={{ flex: 2, background: loading ? '#444' : '#784BA0', color: '#fff', border: 'none', padding: '10px', cursor: 'pointer', fontFamily: 'inherit', fontSize: '12px', letterSpacing: '0.08em', borderRadius: '2px' }}>
-          {loading ? 'Redirecting...' : `Pay $${blockOption.price} with PayPal →`}
+          {loading ? 'Redirecting...' : `Pay $${blockOption.price} with Card / PayPal →`}
         </button>
       </div>
     </Modal>

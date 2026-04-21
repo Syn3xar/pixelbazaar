@@ -694,13 +694,34 @@ export default function Home() {
           {/* Matrix overlay canvas */}
           <canvas ref={matrixCanvasRef} style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, pointerEvents: 'none', opacity: matrixMode ? 0.85 : 0, transition: 'opacity 0.5s' }} />
 
-          {/* Tooltip */}
+          {/* Tooltip — pixel info on hover */}
           {tooltip && mode === 'browse' && (
             <div style={{ position: 'fixed', left: tooltip.x + 14, top: tooltip.y - 10, background: '#050508', border: '1px solid #2a2a3e', borderRadius: '2px', padding: '8px 12px', fontSize: '11px', pointerEvents: 'none', zIndex: 500 }}>
               <div style={{ color: '#e0e0ff', fontWeight: 'bold' }}>{tooltip.pixel.company}</div>
               <div style={{ color: '#555', fontSize: '10px' }}>{tooltip.pixel.block_size && tooltip.pixel.block_size > 1 ? `${tooltip.pixel.block_size}×${tooltip.pixel.block_size} block` : '1×1 pixel'}</div>
               <div style={{ color: '#555' }}>${tooltip.pixel.price.toFixed(2)}</div>
               {tooltip.pixel.auction?.active && <div style={{ color: '#FF6B6B', fontSize: '9px' }}>⚡ AUCTION LIVE — ${tooltip.pixel.auction.currentBid.toFixed(2)}</div>}
+            </div>
+          )}
+
+          {/* Coordinate display on hover — shown when zoomed in enough */}
+          {hoverCoord && zoom >= 6 && !tooltip && mode === 'browse' && (
+            <div style={{
+              position: 'fixed',
+              left: (hoverCoord[0] * zoom + offset.x) + zoom + 6,
+              top: (hoverCoord[1] * zoom + offset.y) - 4,
+              background: 'rgba(5,5,8,0.85)',
+              border: '1px solid #2a2a3e',
+              borderRadius: '2px',
+              padding: '3px 7px',
+              fontSize: '10px',
+              color: '#666',
+              pointerEvents: 'none',
+              zIndex: 499,
+              fontFamily: "'Space Mono', monospace",
+              letterSpacing: '0.05em',
+            }}>
+              [{hoverCoord[0]}, {hoverCoord[1]}]
             </div>
           )}
 

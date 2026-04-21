@@ -16,7 +16,7 @@ type Auction = {
   ends_at: string
   created_at: string
   bids: { bidder_name: string; bidder_email: string; amount: number; created_at: string }[]
-  block?: { company: string; url: string; color?: string }
+  blocks?: { company: string; url: string; color?: string }
 }
 
 function fmtTime(ms: number) {

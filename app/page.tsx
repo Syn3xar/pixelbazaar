@@ -607,7 +607,6 @@ export default function Home() {
       const dx = t.clientX - (touchStartPos.current?.x ?? t.clientX)
       const dy = t.clientY - (touchStartPos.current?.y ?? t.clientY)
       if (Math.sqrt(dx*dx + dy*dy) > 8) isDragged.current = true
-      const t = e.touches[0]
       setOffset({ x: t.clientX - dragStart.x, y: t.clientY - dragStart.y })
     } else if (e.touches.length === 2 && lastTouchDist.current !== null) {
       const dx = e.touches[0].clientX - e.touches[1].clientX

@@ -7,6 +7,7 @@ import BuyModal from '@/components/BuyModal'
 import AuctionModal from '@/components/AuctionModal'
 import BidModal from '@/components/BidModal'
 import StatsBar from '@/components/StatsBar'
+import PixelTracker from '@/components/PixelTracker'
 
 const GRID = 1000
 
@@ -649,6 +650,38 @@ export default function Home() {
               </div>
             </div>
           )}
+
+          {/* Pixel Tracker */}
+          <div style={{ marginTop: '16px', borderTop: '1px solid #1a1a2e', paddingTop: '14px' }}>
+            <div style={{ fontSize: '9px', letterSpacing: '0.15em', color: '#444', marginBottom: '8px', textTransform: 'uppercase' }}>🎯 Pixel Tracker</div>
+            <PixelTracker onJump={(x, y) => {
+              const canvas = canvasRef.current
+              if (!canvas) return
+              const W = canvas.offsetWidth, H = canvas.offsetHeight
+              const newZoom = 20
+              setZoom(newZoom)
+              setOffset({ x: W / 2 - x * newZoom, y: H / 2 - y * newZoom })
+              setSelectedCoord([x, y])
+              showEasterMsg('📍 Jumped to [' + x + ', ' + y + ']', 2000)
+            }} pixelMap={pixelMap} />
+          </div>
+
+          {/* Footer links */}
+          <div style={{ marginTop: 'auto', paddingTop: '20px', borderTop: '1px solid #1a1a2e', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            {[
+              { label: 'Terms & Conditions', href: '/terms' },
+              { label: 'Privacy Policy', href: '/privacy' },
+              { label: 'Refund Policy', href: '/refund' },
+            ].map(({ label, href }) => (
+              <a key={href} href={href} target="_blank" rel="noopener noreferrer"
+                style={{ fontSize: '9px', color: '#444', textDecoration: 'none', letterSpacing: '0.08em' }}
+                onMouseEnter={e => (e.currentTarget.style.color = '#784BA0')}
+                onMouseLeave={e => (e.currentTarget.style.color = '#444')}>
+                {label}
+              </a>
+            ))}
+            <div style={{ fontSize: '9px', color: '#2a2a3e', marginTop: '4px' }}>© 2026 MillionDotBoard</div>
+          </div>
         </div>
 
         {/* Canvas area */}

@@ -97,6 +97,27 @@ export default function AdminPage() {
         </div>
         <div style={{ display: 'flex', gap: '8px' }}>
           <button onClick={loadStats} style={{ background: '#111118', border: '1px solid #2a2a3e', color: '#888', padding: '6px 14px', cursor: 'pointer', fontFamily: 'inherit', fontSize: '11px', borderRadius: '2px' }}>↻ Refresh</button>
+          <button onClick={async () => {
+            const pw = prompt('Admin password:')
+            if (!pw) return
+            const res = await fetch('/api/demo', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: pw }) })
+            const data = await res.json()
+            alert('Demo zone created! ' + JSON.stringify(data.results?.map((r: any) => r.status)))
+            loadStats()
+          }} style={{ background: '#1a5c35', border: '1px solid #92FE9D33', color: '#92FE9D', padding: '6px 14px', cursor: 'pointer', fontFamily: 'inherit', fontSize: '11px', borderRadius: '2px' }}>
+            🎨 Seed Demo Zone
+          </button>
+          <button onClick={async () => {
+            if (!confirm('Remove all demo pixels?')) return
+            const pw = prompt('Admin password:')
+            if (!pw) return
+            const res = await fetch('/api/demo', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: pw }) })
+            const data = await res.json()
+            alert(data.message ?? data.error)
+            loadStats()
+          }} style={{ background: '#8B000022', border: '1px solid #FF6B6B33', color: '#FF6B6B', padding: '6px 14px', cursor: 'pointer', fontFamily: 'inherit', fontSize: '11px', borderRadius: '2px' }}>
+            🗑 Clear Demo
+          </button>
           <a href="/" style={{ background: '#111118', border: '1px solid #2a2a3e', color: '#888', padding: '6px 14px', fontFamily: 'inherit', fontSize: '11px', borderRadius: '2px', textDecoration: 'none' }}>← Board</a>
         </div>
       </div>

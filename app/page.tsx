@@ -500,9 +500,10 @@ export default function Home() {
           setModal('buy')
         }
       } else {
+        // Browse mode
         if (gx >= 0 && gx < GRID && gy >= 0 && gy < GRID) {
-          // EE5: Click same empty pixel 10 times
           const key = `${gx},${gy}`
+          // EE5: Click same empty pixel 10 times
           if (!pixelMap[key]) {
             setClickCount(prev => {
               const next = { ...prev, [key]: (prev[key] ?? 0) + 1 }
@@ -510,7 +511,10 @@ export default function Home() {
               return next
             })
           }
+          // If empty pixel — open BuyModal directly (no block size selection needed first)
+          // If owned pixel — open PixelPanel to inspect
           setSelectedCoord([gx, gy])
+          setModal(null) // let the conditional rendering handle which modal to show
         }
       }
     }
@@ -762,10 +766,15 @@ export default function Home() {
       </div>
 
       {/* Modals */}
-      {selectedCoord && modal === null && mode === 'browse' && (
+      {selectedCoord && modal === null && mode === 'browse' && !selectedPixel && (
+        <BuyModal x={selectedCoord[0]} y={selectedCoord[1]}
+          onClose={() => setSelectedCoord(null)}
+          onSpecialName={handleSpecialCompanyName} />
+      )}
+      {selectedCoord && modal === null && mode === 'browse' && selectedPixel && (
         <PixelPanel pixel={selectedPixel} coord={selectedCoord}
           onClose={() => setSelectedCoord(null)}
-          onBuy={() => { setMode('buy'); setSelectedCoord(null) }}
+          onBuy={() => setModal('buy')}
           onStartAuction={(p) => { setAuctionTarget({ pixel: p, x: selectedCoord[0], y: selectedCoord[1] }); setSelectedCoord(null); setModal('auction') }}
           onBid={(p) => { setBidTarget({ pixel: p, x: selectedCoord[0], y: selectedCoord[1] }); setSelectedCoord(null); setModal('bid') }}
         />

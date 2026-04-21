@@ -580,10 +580,12 @@ export default function Home() {
   }
 
   // Touch handlers for mobile
+  const touchStartPos = useRef<{x:number;y:number} | null>(null)
   const onTouchStart = (e: React.TouchEvent) => {
     if (e.touches.length === 1) {
       isDragged.current = false
       const t = e.touches[0]
+      touchStartPos.current = { x: t.clientX, y: t.clientY }
       setDragging(true)
       setDragStart({ x: t.clientX - offset.x, y: t.clientY - offset.y })
       lastTouchDist.current = null
@@ -601,7 +603,10 @@ export default function Home() {
   const onTouchMove = (e: React.TouchEvent) => {
     e.preventDefault()
     if (e.touches.length === 1 && dragStart) {
-      isDragged.current = true
+      const t = e.touches[0]
+      const dx = t.clientX - (touchStartPos.current?.x ?? t.clientX)
+      const dy = t.clientY - (touchStartPos.current?.y ?? t.clientY)
+      if (Math.sqrt(dx*dx + dy*dy) > 8) isDragged.current = true
       const t = e.touches[0]
       setOffset({ x: t.clientX - dragStart.x, y: t.clientY - dragStart.y })
     } else if (e.touches.length === 2 && lastTouchDist.current !== null) {
@@ -623,6 +628,7 @@ export default function Home() {
   const onTouchEnd = (e: React.TouchEvent) => {
     setDragging(false)
     lastTouchDist.current = null
+    touchStartPos.current = null
     if (!isDragged.current && e.changedTouches.length === 1) {
       const t = e.changedTouches[0]
       const rect = canvasRef.current!.getBoundingClientRect()
@@ -630,11 +636,15 @@ export default function Home() {
       const gy = Math.floor((t.clientY - rect.top - offset.y) / zoom)
       if (gx >= 0 && gx < GRID && gy >= 0 && gy < GRID) {
         if (mode === 'buy') {
+          // In buy mode - open buy modal for available blocks
           const outOfBounds = gx < 0 || gy < 0 || gx + selectedBlockSize.size > GRID || gy + selectedBlockSize.size > GRID
           if (!outOfBounds && isBlockFree(gx, gy, selectedBlockSize.size)) {
             setSelectedCoord([gx, gy]); setModal('buy')
+          } else if (!outOfBounds) {
+            showEasterMsg('🔴 This spot is taken — tap a different area', 2000)
           }
         } else {
+          // Browse mode - just show pixel info, don't auto-open buy
           setSelectedCoord([gx, gy]); setModal(null)
         }
       }
@@ -956,8 +966,16 @@ export default function Home() {
 
       {/* Mobile menu overlay */}
       {isMobile && showMobileMenu && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.9)', zIndex: 500, display: 'flex', flexDirection: 'column', padding: '24px' }} onClick={() => setShowMobileMenu(false)}>
-          <div style={{ fontFamily: "'Orbitron', sans-serif", fontWeight: 900, fontSize: '20px', marginBottom: '32px' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.95)', zIndex: 500, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+          {/* Menu header with close button */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 24px', borderBottom: '1px solid #1a1a2e', position: 'sticky', top: 0, background: 'rgba(0,0,0,0.95)', zIndex: 1 }}>
+            <div style={{ fontFamily: "'Orbitron', sans-serif", fontWeight: 900, fontSize: '18px' }}>
+              <span style={{ color: '#784BA0' }}>MILLION</span><span style={{ color: '#e0e0ff' }}>DOTBOARD</span>
+            </div>
+            <button onClick={() => setShowMobileMenu(false)} style={{ background: '#1a1a2e', border: 'none', color: '#e0e0ff', fontSize: '20px', width: '40px', height: '40px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+          </div>
+          <div style={{ padding: '16px 24px', flex: 1 }}>
+          <div style={{ fontFamily: "'Orbitron', sans-serif", fontWeight: 900, fontSize: '20px', marginBottom: '32px', display: 'none' }}>
             <span style={{ color: '#784BA0' }}>MILLION</span><span style={{ color: '#e0e0ff' }}>DOTBOARD</span>
           </div>
           {[
@@ -1008,14 +1026,18 @@ export default function Home() {
               showEasterMsg('📍 Jumped to [' + x + ', ' + y + ']', 2000)
             }} pixelMap={pixelMap} />
           </div>
+          </div>
         </div>
       )}
 
       {/* Mobile buy mode banner */}
       {isMobile && mode === 'buy' && (
-        <div style={{ position: 'fixed', top: '54px', left: 0, right: 0, background: '#784BA0', padding: '8px 16px', zIndex: 50, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span style={{ color: '#fff', fontSize: '12px', fontFamily: 'inherit' }}>🛒 {selectedBlockSize.label} — ${selectedBlockSize.price} · Tap a free spot</span>
-          <button onClick={() => { setMode('browse'); setMobileTab('board') }} style={{ background: 'rgba(255,255,255,0.2)', border: 'none', color: '#fff', padding: '4px 10px', borderRadius: '12px', cursor: 'pointer', fontFamily: 'inherit', fontSize: '11px' }}>Cancel</button>
+        <div style={{ background: '#784BA0', padding: '10px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
+          <div>
+            <div style={{ color: '#fff', fontSize: '13px', fontWeight: 'bold' }}>🛒 Buy Mode — {selectedBlockSize.label}</div>
+            <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '10px' }}>Tap any green area to purchase for ${selectedBlockSize.price}</div>
+          </div>
+          <button onClick={() => { setMode('browse'); setMobileTab('board') }} style={{ background: '#fff', border: 'none', color: '#784BA0', padding: '8px 14px', borderRadius: '20px', cursor: 'pointer', fontFamily: 'inherit', fontSize: '12px', fontWeight: 'bold', whiteSpace: 'nowrap' }}>← Board</button>
         </div>
       )}
 

@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
     try {
       const { approveUrl } = await createPayPalOrder({
         amountUSD:   amount.toFixed(2),
-        description: `MillionDollarBoard auction win — ${auction.block_size}×${auction.block_size} block at [${auction.origin_x},${auction.origin_y}]`,
+        description: `MillionDotBoard auction win — ${auction.block_size}×${auction.block_size} block at [${auction.origin_x},${auction.origin_y}]`,
         returnUrl:   `${appUrl}/api/paypal/auction-capture?${params}`,
         cancelUrl:   `${appUrl}/`,
       })

@@ -620,14 +620,14 @@ export default function Home() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
           <div style={{ fontFamily: "'Orbitron', sans-serif", fontWeight: 900, fontSize: '18px' }}>
             <span style={{ color: '#784BA0' }}>MILLION</span>
-            <span style={{ color: '#e0e0ff' }}>DOLLARBOARD</span>
+            <span style={{ color: '#e0e0ff' }}>DOTBOARD</span>
             <span style={{ color: '#FF6B6B', fontSize: '10px', verticalAlign: 'super', marginLeft: '2px' }}>×10⁶</span>
           </div>
           <div style={{ width: '1px', height: '24px', background: '#1a1a2e' }} />
           <div style={{ fontSize: '10px', color: '#777', letterSpacing: '0.1em' }}>1,000,000 PIXEL MARKETPLACE</div>
           <div style={{ width: '1px', height: '24px', background: '#1a1a2e' }} />
           <div style={{ fontSize: '9px', color: '#444', letterSpacing: '0.06em' }}>
-            Last update: <span style={{ color: '#555' }}>Update.2.260421</span>
+            Last update: <span style={{ color: '#555' }}>Update.11.260421</span>
           </div>
         </div>
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>

@@ -57,6 +57,11 @@ export default function Home() {
   const [mode, setMode]                     = useState<'browse'|'buy'>('browse')
   const [canvasSize, setCanvasSize] = useState({ w: 800, h: 600 })
   const isDragged = useRef(false)
+  const lastTouchDist = useRef<number | null>(null)
+  const lastTouchCenter = useRef<{x:number;y:number} | null>(null)
+  const [isMobile, setIsMobile] = useState(false)
+  const [mobileTab, setMobileTab] = useState<'board'|'buy'|'auctions'|'rankings'|'menu'>('board')
+  const [showMobileMenu, setShowMobileMenu] = useState(false)
 
   // ── Easter egg state ───────────────────────────────────────────────────────
   const [easterMsg, setEasterMsg]   = useState<string|null>(null)  // toast message
@@ -491,6 +496,14 @@ export default function Home() {
     return () => window.removeEventListener('resize', resize)
   }, [])
 
+  // Mobile detection
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
+
   const coordFromEvent = (e: React.MouseEvent) => {
     const rect = canvasRef.current!.getBoundingClientRect()
     return [
@@ -566,6 +579,69 @@ export default function Home() {
     setZoom(newZoom)
   }
 
+  // Touch handlers for mobile
+  const onTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 1) {
+      isDragged.current = false
+      const t = e.touches[0]
+      setDragging(true)
+      setDragStart({ x: t.clientX - offset.x, y: t.clientY - offset.y })
+      lastTouchDist.current = null
+    } else if (e.touches.length === 2) {
+      const dx = e.touches[0].clientX - e.touches[1].clientX
+      const dy = e.touches[0].clientY - e.touches[1].clientY
+      lastTouchDist.current = Math.sqrt(dx*dx + dy*dy)
+      lastTouchCenter.current = {
+        x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
+        y: (e.touches[0].clientY + e.touches[1].clientY) / 2,
+      }
+    }
+  }
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    e.preventDefault()
+    if (e.touches.length === 1 && dragStart) {
+      isDragged.current = true
+      const t = e.touches[0]
+      setOffset({ x: t.clientX - dragStart.x, y: t.clientY - dragStart.y })
+    } else if (e.touches.length === 2 && lastTouchDist.current !== null) {
+      const dx = e.touches[0].clientX - e.touches[1].clientX
+      const dy = e.touches[0].clientY - e.touches[1].clientY
+      const dist = Math.sqrt(dx*dx + dy*dy)
+      const factor = dist / lastTouchDist.current
+      const rect = canvasRef.current!.getBoundingClientRect()
+      const cx = lastTouchCenter.current!.x - rect.left
+      const cy = lastTouchCenter.current!.y - rect.top
+      const newZoom = Math.min(80, Math.max(0.3, zoom * factor))
+      const scale = newZoom / zoom
+      setOffset(o => ({ x: cx - (cx - o.x) * scale, y: cy - (cy - o.y) * scale }))
+      setZoom(newZoom)
+      lastTouchDist.current = dist
+    }
+  }
+
+  const onTouchEnd = (e: React.TouchEvent) => {
+    setDragging(false)
+    lastTouchDist.current = null
+    if (!isDragged.current && e.changedTouches.length === 1) {
+      const t = e.changedTouches[0]
+      const rect = canvasRef.current!.getBoundingClientRect()
+      const gx = Math.floor((t.clientX - rect.left - offset.x) / zoom)
+      const gy = Math.floor((t.clientY - rect.top - offset.y) / zoom)
+      if (gx >= 0 && gx < GRID && gy >= 0 && gy < GRID) {
+        if (mode === 'buy') {
+          const outOfBounds = gx < 0 || gy < 0 || gx + selectedBlockSize.size > GRID || gy + selectedBlockSize.size > GRID
+          if (!outOfBounds && isBlockFree(gx, gy, selectedBlockSize.size)) {
+            setSelectedCoord([gx, gy]); setModal('buy')
+          }
+        } else {
+          setSelectedCoord([gx, gy]); setModal(null)
+        }
+      }
+    }
+    setDragStart(null)
+  }
+
   // EE8: Triple click
   const clickTimes = useRef<number[]>([])
   const onMouseClick = () => {
@@ -616,31 +692,33 @@ export default function Home() {
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#08080f', overflow: 'hidden', transform: boardFlipped ? 'scaleY(-1)' : 'none', transition: 'transform 0.5s' }}>
 
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 24px', height: '56px', background: '#050508', borderBottom: '1px solid #1a1a2e', flexShrink: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div style={{ fontFamily: "'Orbitron', sans-serif", fontWeight: 900, fontSize: '18px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: isMobile ? '0 12px' : '0 24px', height: isMobile ? '48px' : '56px', background: '#050508', borderBottom: '1px solid #1a1a2e', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '8px' : '16px' }}>
+          <div style={{ fontFamily: "'Orbitron', sans-serif", fontWeight: 900, fontSize: isMobile ? '14px' : '18px' }}>
             <span style={{ color: '#784BA0' }}>MILLION</span>
             <span style={{ color: '#e0e0ff' }}>DOTBOARD</span>
             <span style={{ color: '#FF6B6B', fontSize: '10px', verticalAlign: 'super', marginLeft: '2px' }}>×10⁶</span>
           </div>
-          <div style={{ width: '1px', height: '24px', background: '#1a1a2e' }} />
-          <div style={{ fontSize: '10px', color: '#777', letterSpacing: '0.1em' }}>1,000,000 PIXEL MARKETPLACE</div>
-          <div style={{ width: '1px', height: '24px', background: '#1a1a2e' }} />
-          <div style={{ fontSize: '9px', color: '#444', letterSpacing: '0.06em' }}>
-            Last update: <span style={{ color: '#555' }}>Update.11.260421</span>
-          </div>
+          {!isMobile && <>
+            <div style={{ width: '1px', height: '24px', background: '#1a1a2e' }} />
+            <div style={{ fontSize: '10px', color: '#777', letterSpacing: '0.1em' }}>1,000,000 PIXEL MARKETPLACE</div>
+            <div style={{ width: '1px', height: '24px', background: '#1a1a2e' }} />
+            <div style={{ fontSize: '9px', color: '#444', letterSpacing: '0.06em' }}>
+              Last update: <span style={{ color: '#555' }}>Update.12.260421</span>
+            </div>
+          </>}
         </div>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-          <span style={{ fontSize: '10px', color: '#888' }}>ZOOM: {zoom.toFixed(1)}×</span>
+        <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+          {!isMobile && <span style={{ fontSize: '10px', color: '#888' }}>ZOOM: {zoom.toFixed(1)}×</span>}
           {[['＋', 1.5], ['－', 1/1.5]].map(([label, f]) => (
             <button key={label as string} onClick={() => setZoom(z => Math.min(80, Math.max(0.3, z * (f as number))))}
-              style={{ background: '#111118', border: '1px solid #2a2a3e', color: '#888', padding: '6px 12px', cursor: 'pointer', fontFamily: 'inherit', fontSize: '12px', borderRadius: '2px' }}>
+              style={{ background: '#111118', border: '1px solid #2a2a3e', color: '#888', padding: isMobile ? '8px 14px' : '6px 12px', cursor: 'pointer', fontFamily: 'inherit', fontSize: isMobile ? '16px' : '12px', borderRadius: '2px' }}>
               {label as string}
             </button>
           ))}
           <button onClick={() => { setZoom(1); setOffset({ x: 0, y: 0 }) }}
-            style={{ background: '#111118', border: '1px solid #2a2a3e', color: '#888', padding: '6px 12px', cursor: 'pointer', fontFamily: 'inherit', fontSize: '10px', borderRadius: '2px' }}>
-            RESET
+            style={{ background: '#111118', border: '1px solid #2a2a3e', color: '#888', padding: isMobile ? '8px 10px' : '6px 12px', cursor: 'pointer', fontFamily: 'inherit', fontSize: '10px', borderRadius: '2px' }}>
+            {isMobile ? '⌂' : 'RESET'}
           </button>
         </div>
       </div>
@@ -648,10 +726,11 @@ export default function Home() {
       <StatsBar pixelMap={pixelMap} revenue={revenue} />
       <RecentTicker />
 
+      <div style={{ flex: 1, display: 'flex', overflow: 'hidden', flexDirection: 'column' }}>
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
 
-        {/* Sidebar */}
-        <div style={{ width: '200px', flexShrink: 0, background: '#050508', borderRight: '1px solid #1a1a2e', display: 'flex', flexDirection: 'column', padding: '16px 12px', gap: '8px', overflowY: 'auto' }}>
+        {/* Sidebar - hidden on mobile */}
+        {!isMobile && <div style={{ width: '200px', flexShrink: 0, background: '#050508', borderRight: '1px solid #1a1a2e', display: 'flex', flexDirection: 'column', padding: '16px 12px', gap: '8px', overflowY: 'auto' }}>
           <div style={{ fontSize: '9px', letterSpacing: '0.15em', color: '#777', marginBottom: '4px', textTransform: 'uppercase' }}>Mode</div>
           <button onClick={() => { setMode('browse'); setHoverCoord(null) }} style={{ padding: '8px', fontSize: '11px', cursor: 'pointer', borderRadius: '2px', fontFamily: 'inherit', textAlign: 'left', background: mode === 'browse' ? '#1a1a2e' : 'transparent', color: mode === 'browse' ? '#e0e0ff' : '#888', border: `1px solid ${mode === 'browse' ? '#784BA0' : '#1a1a2e'}` }}>
             🔍 Browse Board
@@ -731,12 +810,16 @@ export default function Home() {
           </div>
         </div>
 
+        }
         {/* Canvas area */}
         <div style={{ flex: 1, position: 'relative', overflow: 'hidden', cursor: getCursor() }}>
-          <canvas ref={canvasRef} style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }}
+          <canvas ref={canvasRef} style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, touchAction: 'none' }}
             onMouseDown={onMouseDown} onMouseMove={onMouseMove} onMouseUp={onMouseUp} onClick={onMouseClick}
             onMouseLeave={() => { setDragging(false); setTooltip(null); setHoverCoord(null) }}
-            onWheel={onWheel} />
+            onWheel={onWheel}
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEnd} />
 
           {/* Matrix overlay canvas */}
           <canvas ref={matrixCanvasRef} style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, pointerEvents: 'none', opacity: matrixMode ? 0.85 : 0, transition: 'opacity 0.5s' }} />
@@ -839,6 +922,102 @@ export default function Home() {
           )}
         </div>
       </div>
+
+      </div>
+
+      {/* Mobile bottom navigation */}
+      {isMobile && (
+        <div style={{ display: 'flex', background: '#050508', borderTop: '1px solid #1a1a2e', flexShrink: 0, zIndex: 100 }}>
+          {[
+            { id: 'board', icon: '🗺', label: 'Board' },
+            { id: 'buy', icon: '🛒', label: 'Buy' },
+            { id: 'auctions', icon: '⚡', label: 'Auctions', href: '/auctions' },
+            { id: 'rankings', icon: '🏆', label: 'Rank', href: '/rankings' },
+            { id: 'menu', icon: '☰', label: 'Menu' },
+          ].map(tab => (
+            <button key={tab.id} onClick={() => {
+              if (tab.href) { window.location.href = tab.href; return }
+              if (tab.id === 'buy') { setMode('buy'); setMobileTab('buy') }
+              else if (tab.id === 'board') { setMode('browse'); setMobileTab('board') }
+              else if (tab.id === 'menu') setShowMobileMenu(m => !m)
+              else setMobileTab(tab.id as any)
+            }} style={{
+              flex: 1, background: 'transparent', border: 'none', padding: '10px 4px 8px',
+              cursor: 'pointer', fontFamily: 'inherit', display: 'flex', flexDirection: 'column',
+              alignItems: 'center', gap: '2px',
+              borderTop: (mobileTab === tab.id) ? '2px solid #784BA0' : '2px solid transparent',
+            }}>
+              <span style={{ fontSize: '18px' }}>{tab.icon}</span>
+              <span style={{ fontSize: '9px', color: mobileTab === tab.id ? '#784BA0' : '#555', letterSpacing: '0.06em' }}>{tab.label}</span>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Mobile menu overlay */}
+      {isMobile && showMobileMenu && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.9)', zIndex: 500, display: 'flex', flexDirection: 'column', padding: '24px' }} onClick={() => setShowMobileMenu(false)}>
+          <div style={{ fontFamily: "'Orbitron', sans-serif", fontWeight: 900, fontSize: '20px', marginBottom: '32px' }}>
+            <span style={{ color: '#784BA0' }}>MILLION</span><span style={{ color: '#e0e0ff' }}>DOTBOARD</span>
+          </div>
+          {[
+            { label: '🗺 View Board', action: () => { setMode('browse'); setMobileTab('board'); setShowMobileMenu(false) } },
+            { label: '🛒 Buy Pixels', action: () => { setMode('buy'); setMobileTab('buy'); setShowMobileMenu(false) } },
+            { label: '⚡ Live Auctions', href: '/auctions' },
+            { label: '🏆 Rankings', href: '/rankings' },
+            { label: '🖼 My Pixels', href: '/my-pixels' },
+            { label: '📬 Contact Us', href: '/contact' },
+            { label: '📜 Terms', href: '/terms' },
+            { label: '🔒 Privacy', href: '/privacy' },
+          ].map(({ label, action, href }: any) => (
+            <button key={label} onClick={action ?? (() => window.location.href = href)} style={{
+              background: 'transparent', border: 'none', color: '#e0e0ff', fontSize: '16px',
+              padding: '16px 0', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left',
+              borderBottom: '1px solid #1a1a2e', letterSpacing: '0.04em',
+            }}>{label}</button>
+          ))}
+
+          {/* Mobile block size selector */}
+          <div style={{ marginTop: '24px' }}>
+            <div style={{ fontSize: '10px', color: '#555', letterSpacing: '0.1em', marginBottom: '12px', textTransform: 'uppercase' }}>Block Size</div>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              {BLOCK_SIZES.map(bs => (
+                <button key={bs.label} onClick={() => { setSelectedBlockSize(bs); setMode('buy'); setMobileTab('buy'); setShowMobileMenu(false) }} style={{
+                  flex: 1, padding: '12px 4px', cursor: 'pointer', borderRadius: '4px', fontFamily: 'inherit',
+                  background: selectedBlockSize.size === bs.size ? '#111118' : 'transparent',
+                  border: `1px solid ${selectedBlockSize.size === bs.size ? bs.color : '#2a2a3e'}`,
+                  display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'center',
+                }}>
+                  <span style={{ color: bs.color, fontWeight: 'bold', fontSize: '13px' }}>{bs.label}</span>
+                  <span style={{ color: '#FFD700', fontSize: '13px' }}>${bs.price}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Mobile pixel tracker */}
+          <div style={{ marginTop: '24px' }}>
+            <div style={{ fontSize: '10px', color: '#555', letterSpacing: '0.1em', marginBottom: '12px', textTransform: 'uppercase' }}>🎯 Jump to Pixel</div>
+            <PixelTracker onJump={(x, y) => {
+              const W = canvasSize.w, H = canvasSize.h
+              const newZoom = 20
+              setZoom(newZoom)
+              setOffset({ x: W / 2 - x * newZoom, y: H / 2 - y * newZoom })
+              setSelectedCoord([x, y])
+              setShowMobileMenu(false)
+              showEasterMsg('📍 Jumped to [' + x + ', ' + y + ']', 2000)
+            }} pixelMap={pixelMap} />
+          </div>
+        </div>
+      )}
+
+      {/* Mobile buy mode banner */}
+      {isMobile && mode === 'buy' && (
+        <div style={{ position: 'fixed', top: '54px', left: 0, right: 0, background: '#784BA0', padding: '8px 16px', zIndex: 50, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span style={{ color: '#fff', fontSize: '12px', fontFamily: 'inherit' }}>🛒 {selectedBlockSize.label} — ${selectedBlockSize.price} · Tap a free spot</span>
+          <button onClick={() => { setMode('browse'); setMobileTab('board') }} style={{ background: 'rgba(255,255,255,0.2)', border: 'none', color: '#fff', padding: '4px 10px', borderRadius: '12px', cursor: 'pointer', fontFamily: 'inherit', fontSize: '11px' }}>Cancel</button>
+        </div>
+      )}
 
       {/* Modals */}
       {selectedCoord && modal === null && mode === 'browse' && !selectedPixel && (

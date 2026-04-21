@@ -81,7 +81,7 @@ export default function BuyModal({ x, y, onClose, onSpecialName }: Props) {
     if (!form.company.trim() || !form.url.trim() || !form.email.trim()) return alert('Please fill in all fields')
     setLoading(true)
     try {
-      const res = await fetch('/api/paddle/checkout', {
+      const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

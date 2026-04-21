@@ -2,8 +2,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 
-const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD ?? 'admin123'
-
 type Stats = {
   totalPixels: number
   totalBlocks: number
@@ -66,9 +64,18 @@ export default function AdminPage() {
       <div style={{ background: '#0f0f1a', border: '1px solid #2a2a3e', borderRadius: '2px', padding: '40px', width: '320px' }}>
         <div style={{ color: '#784BA0', fontSize: '11px', letterSpacing: '0.2em', marginBottom: '24px', textTransform: 'uppercase' }}>Admin Access</div>
         <input type="password" value={pw} onChange={e => setPw(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && (pw === ADMIN_PASSWORD ? setAuthed(true) : alert('Wrong password'))}
+          onKeyDown={async e => {
+            if (e.key !== 'Enter') return
+            const res = await fetch('/api/admin/auth', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: pw }) })
+            if (res.ok) setAuthed(true)
+            else alert('Wrong password')
+          }}
           placeholder="Password" style={{ width: '100%', background: '#111118', border: '1px solid #2a2a3e', color: '#e0e0ff', padding: '10px 12px', fontFamily: 'inherit', fontSize: '13px', borderRadius: '2px', outline: 'none', boxSizing: 'border-box', marginBottom: '12px' }} />
-        <button onClick={() => pw === ADMIN_PASSWORD ? setAuthed(true) : alert('Wrong password')}
+        <button onClick={async () => {
+            const res = await fetch('/api/admin/auth', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: pw }) })
+            if (res.ok) setAuthed(true)
+            else alert('Wrong password')
+          }}
           style={{ width: '100%', background: '#784BA0', color: '#fff', border: 'none', padding: '10px', cursor: 'pointer', fontFamily: 'inherit', fontSize: '12px', borderRadius: '2px' }}>
           Enter →
         </button>

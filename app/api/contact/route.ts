@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { logActivity } from '@/lib/requestInfo'
 
 export async function POST(req: NextRequest) {
   const { name, email, type, pixelCoords, message } = await req.json()
@@ -10,13 +11,12 @@ export async function POST(req: NextRequest) {
 
   const db = supabaseAdmin()
 
-  // Log contact request in activity_log
-  await db.from('activity_log').insert({
-    event_type: 'contact_form',
+  // Log contact with full request info
+  await logActivity(db, 'contact_form', req, {
     actor_email: email,
-    actor_name: name,
-    metadata: { type, pixelCoords, message },
-  }).catch(() => {}) // don't fail if table doesn't exist yet
+    actor_name:  name,
+    metadata:    { type, pixelCoords, message },
+  }).catch(() => {})
 
   // Send email via Resend if configured
   const RESEND_API_KEY = process.env.RESEND_API_KEY

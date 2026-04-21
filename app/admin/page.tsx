@@ -10,6 +10,7 @@ type Stats = {
   recentTransactions: any[]
   topBuyers: any[]
   recentBlocks: any[]
+  activityLog: any[]
 }
 
 export default function AdminPage() {
@@ -168,6 +169,42 @@ export default function AdminPage() {
                 ))}
               </tbody>
             </table>
+          </div>
+
+          {/* Activity Log */}
+          <div style={{ background: '#0f0f1a', border: '1px solid #1a1a2e', borderRadius: '2px', padding: '20px', marginTop: '16px' }}>
+            <div style={{ fontSize: '10px', color: '#888', letterSpacing: '0.1em', marginBottom: '16px', textTransform: 'uppercase' }}>🌍 Activity Log — IP, Country & Device</div>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '10px', whiteSpace: 'nowrap' }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid #1a1a2e' }}>
+                    {['Event', 'Actor', 'Amount', 'Country', 'City', 'IP', 'Device', 'Browser', 'OS', 'Referrer', 'Date'].map(h => (
+                      <th key={h} style={{ textAlign: 'left', padding: '6px 10px', color: '#555', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {stats.activityLog.map((a, i) => (
+                    <tr key={i} style={{ borderBottom: '1px solid #0a0a14' }}>
+                      <td style={{ padding: '7px 10px', color: a.event_type === 'pixel_purchase' ? '#4ECDC4' : a.event_type === 'bid_placed' ? '#FFD700' : a.event_type === 'contact_form' ? '#784BA0' : '#888' }}>{a.event_type}</td>
+                      <td style={{ padding: '7px 10px', color: '#e0e0ff' }}>{a.actor_email ?? '—'}</td>
+                      <td style={{ padding: '7px 10px', color: '#92FE9D' }}>{a.amount ? '$' + Number(a.amount).toFixed(2) : '—'}</td>
+                      <td style={{ padding: '7px 10px', color: '#e0e0ff' }}>{a.country_code ? `${a.country_code} ${a.country ?? ''}` : '—'}</td>
+                      <td style={{ padding: '7px 10px', color: '#888' }}>{a.city ?? '—'}</td>
+                      <td style={{ padding: '7px 10px', color: '#555', fontFamily: 'monospace' }}>{a.ip_address ?? '—'}</td>
+                      <td style={{ padding: '7px 10px', color: '#888' }}>{a.device_type ?? '—'}</td>
+                      <td style={{ padding: '7px 10px', color: '#888' }}>{a.browser ?? '—'}</td>
+                      <td style={{ padding: '7px 10px', color: '#888' }}>{a.os ?? '—'}</td>
+                      <td style={{ padding: '7px 10px', color: '#555', maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis' }}>{a.referrer ?? '—'}</td>
+                      <td style={{ padding: '7px 10px', color: '#444' }}>{new Date(a.created_at).toLocaleString()}</td>
+                    </tr>
+                  ))}
+                  {stats.activityLog.length === 0 && (
+                    <tr><td colSpan={11} style={{ padding: '20px', color: '#444', textAlign: 'center' }}>No activity logged yet</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </>
       )}

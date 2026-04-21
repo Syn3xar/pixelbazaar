@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { logActivity } from '@/lib/requestInfo'
 
 export async function POST(req: NextRequest) {
   const { blockId, minBid, hours, sellerEmail } = await req.json()
@@ -40,5 +41,15 @@ export async function POST(req: NextRequest) {
   }).select().single()
 
   if (auctionErr) return NextResponse.json({ error: auctionErr.message }, { status: 500 })
+
+  // Log activity
+  await logActivity(db, 'auction_created', req, {
+    actor_email: sellerEmail,
+    block_id:    block.id,
+    auction_id:  auction.id,
+    amount:      minBid,
+    metadata:    { origin_x: block.origin_x, origin_y: block.origin_y, block_size: block.block_size, hours },
+  })
+
   return NextResponse.json({ auction })
 }

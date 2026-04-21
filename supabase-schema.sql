@@ -112,25 +112,46 @@ CREATE INDEX idx_auctions_status ON auctions(status);
 CREATE INDEX idx_auctions_ends   ON auctions(ends_at);
 
 -- ================================================================
--- ACTIVITY LOG — comprehensive event tracking
+-- ACTIVITY LOG — comprehensive event tracking with geo & device info
 -- ================================================================
 CREATE TABLE IF NOT EXISTS activity_log (
-  id          BIGSERIAL PRIMARY KEY,
-  event_type  TEXT NOT NULL,  -- 'pixel_purchase' | 'auction_created' | 'bid_placed' | 'auction_won' | 'auction_ended'
-  block_id    BIGINT,
-  auction_id  BIGINT,
-  actor_email TEXT,
-  actor_name  TEXT,
-  amount      NUMERIC(10,2),
-  metadata    JSONB,          -- any extra info: coordinates, block size, company, etc
-  ip_address  TEXT,
-  user_agent  TEXT,
-  created_at  TIMESTAMPTZ DEFAULT NOW()
+  id            BIGSERIAL PRIMARY KEY,
+  event_type    TEXT NOT NULL,
+  -- Actor info
+  actor_email   TEXT,
+  actor_name    TEXT,
+  -- Block/auction references
+  block_id      BIGINT,
+  auction_id    BIGINT,
+  -- Financial
+  amount        NUMERIC(10,2),
+  platform_fee  NUMERIC(10,2),
+  -- Location & device
+  ip_address    TEXT,
+  country       TEXT,
+  country_code  TEXT,
+  city          TEXT,
+  region        TEXT,
+  timezone      TEXT,
+  -- Device & browser
+  user_agent    TEXT,
+  device_type   TEXT,   -- 'mobile' | 'desktop' | 'tablet'
+  browser       TEXT,
+  os            TEXT,
+  -- Referrer
+  referrer      TEXT,
+  -- Extra data (coordinates, block size, etc)
+  metadata      JSONB,
+  -- Timestamps
+  created_at    TIMESTAMPTZ DEFAULT NOW()
 );
 
 ALTER TABLE activity_log ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "read activity"  ON activity_log FOR SELECT USING (true);
 CREATE POLICY "write activity" ON activity_log FOR INSERT WITH CHECK (true);
-CREATE INDEX idx_activity_type ON activity_log(event_type);
-CREATE INDEX idx_activity_date ON activity_log(created_at);
-CREATE INDEX idx_activity_block ON activity_log(block_id);
+CREATE INDEX IF NOT EXISTS idx_activity_type    ON activity_log(event_type);
+CREATE INDEX IF NOT EXISTS idx_activity_date    ON activity_log(created_at);
+CREATE INDEX IF NOT EXISTS idx_activity_block   ON activity_log(block_id);
+CREATE INDEX IF NOT EXISTS idx_activity_email   ON activity_log(actor_email);
+CREATE INDEX IF NOT EXISTS idx_activity_country ON activity_log(country_code);
+CREATE INDEX IF NOT EXISTS idx_activity_ip      ON activity_log(ip_address);

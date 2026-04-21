@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { capturePayPalOrder } from '@/lib/paypal'
+import { logActivity } from '@/lib/requestInfo'
 import { supabaseAdmin } from '@/lib/supabase'
 
 export async function GET(req: NextRequest) {
@@ -72,14 +73,14 @@ export async function GET(req: NextRequest) {
       buyer_email: email,
     })
 
-    // Log the activity
-    await db.from('activity_log').insert({
-      event_type: 'pixel_purchase',
-      block_id: block.id,
-      actor_email: email,
-      actor_name: company,
-      amount: price,
-      metadata: { x, y, blockSize, url, pixelCount: blockSize * blockSize, orderId },
+    // Log activity with full request info
+    await logActivity(db, 'pixel_purchase', req, {
+      actor_email:  email,
+      actor_name:   company,
+      block_id:     block.id,
+      amount:       price,
+      platform_fee: price * 0.1,
+      metadata:     { x, y, blockSize, url, pixelCount: blockSize * blockSize, orderId },
     })
 
     // Send confirmation email

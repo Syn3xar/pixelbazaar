@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { createPayPalOrder } from '@/lib/paypal'
+import { logActivity } from '@/lib/requestInfo'
 
 export async function POST(req: NextRequest) {
   const { auctionId, bidderName, bidderEmail, amount } = await req.json()
@@ -40,6 +41,17 @@ export async function POST(req: NextRequest) {
     origin_y:     auction.origin_y,
     block_size:   auction.block_size,
     buyer_email:  bidderEmail,
+  })
+
+  // Log activity with full request info
+  await logActivity(db, 'bid_placed', req, {
+    actor_email:  bidderEmail,
+    actor_name:   bidderName,
+    auction_id:   auctionId,
+    block_id:     auction.block_id,
+    amount,
+    platform_fee: amount * 0.1,
+    metadata:     { origin_x: auction.origin_x, origin_y: auction.origin_y, block_size: auction.block_size },
   })
 
   // If auction ending within 5 min, create PayPal checkout for winner

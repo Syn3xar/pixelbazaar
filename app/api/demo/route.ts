@@ -102,10 +102,28 @@ export async function DELETE(req: NextRequest) {
   }
 
   const db = supabaseAdmin()
-  const { error } = await db.from('blocks')
-    .delete()
-    .eq('owner_email', 'demo@milliondotboard.com')
 
+  // Get demo block IDs first
+  const { data: demoBlocks } = await db.from('blocks').select('id').eq('owner_email', 'demo@milliondotboard.com')
+  const blockIds = demoBlocks?.map(b => b.id) ?? []
+
+  if (blockIds.length > 0) {
+    // Get auction IDs linked to demo blocks
+    const { data: demoAuctions } = await db.from('auctions').select('id').in('block_id', blockIds)
+    const auctionIds = demoAuctions?.map(a => a.id) ?? []
+
+    // Delete bids first
+    if (auctionIds.length > 0) {
+      await db.from('bids').delete().in('auction_id', auctionIds)
+    }
+    // Delete auctions
+    await db.from('auctions').delete().in('block_id', blockIds)
+    // Delete pixels
+    await db.from('pixels').delete().in('block_id', blockIds)
+  }
+
+  // Delete blocks
+  const { error } = await db.from('blocks').delete().eq('owner_email', 'demo@milliondotboard.com')
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ ok: true, message: 'All demo pixels removed' })
+  return NextResponse.json({ ok: true, message: 'All demo pixels removed successfully' })
 }

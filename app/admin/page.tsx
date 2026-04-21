@@ -21,11 +21,12 @@ export default function AdminPage() {
 
   async function loadStats() {
     setLoading(true)
-    const [pixels, blocks, txns, auctions] = await Promise.all([
+    const [pixels, blocks, txns, auctions, activityRes] = await Promise.all([
       supabase.from('pixels').select('id', { count: 'exact', head: true }),
       supabase.from('blocks').select('id', { count: 'exact', head: true }),
       supabase.from('transactions').select('*').order('created_at', { ascending: false }).limit(20),
       supabase.from('auctions').select('*').eq('status', 'active'),
+      supabase.from('activity_log').select('*').order('created_at', { ascending: false }).limit(50),
     ])
 
     const recentBlocks = await supabase
@@ -54,6 +55,7 @@ export default function AdminPage() {
       recentTransactions: txns.data ?? [],
       topBuyers,
       recentBlocks: recentBlocks.data ?? [],
+      activityLog: activityRes.data ?? [],
     })
     setLoading(false)
   }

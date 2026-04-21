@@ -8,6 +8,8 @@ import AuctionModal from '@/components/AuctionModal'
 import BidModal from '@/components/BidModal'
 import StatsBar from '@/components/StatsBar'
 import PixelTracker from '@/components/PixelTracker'
+import RecentTicker from '@/components/RecentTicker'
+import Minimap from '@/components/Minimap'
 
 const GRID = 1000
 
@@ -53,6 +55,7 @@ export default function Home() {
   const [hoverCoord, setHoverCoord]         = useState<[number,number]|null>(null)
   const [selectedBlockSize, setSelectedBlockSize] = useState(BLOCK_SIZES[0])
   const [mode, setMode]                     = useState<'browse'|'buy'>('browse')
+  const [canvasSize, setCanvasSize] = useState({ w: 800, h: 600 })
   const isDragged = useRef(false)
 
   // ── Easter egg state ───────────────────────────────────────────────────────
@@ -449,7 +452,7 @@ export default function Home() {
     const resize = () => {
       const c = canvasRef.current
       const m = matrixCanvasRef.current
-      if (c) { c.width = c.offsetWidth; c.height = c.offsetHeight }
+      if (c) { c.width = c.offsetWidth; c.height = c.offsetHeight; setCanvasSize({ w: c.offsetWidth, h: c.offsetHeight }) }
       if (m) { m.width = m.offsetWidth; m.height = m.offsetHeight }
     }
     resize()
@@ -608,6 +611,7 @@ export default function Home() {
       </div>
 
       <StatsBar pixelMap={pixelMap} revenue={revenue} />
+      <RecentTicker />
 
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
 
@@ -673,6 +677,7 @@ export default function Home() {
           {/* Footer links */}
           <div style={{ marginTop: 'auto', paddingTop: '20px', borderTop: '1px solid #1a1a2e', display: 'flex', flexDirection: 'column', gap: '6px' }}>
             {[
+              { label: '🖼 My Pixels', href: '/my-pixels' },
               { label: 'Terms & Conditions', href: '/terms' },
               { label: 'Privacy Policy', href: '/privacy' },
               { label: 'Refund Policy', href: '/refund' },
@@ -758,9 +763,41 @@ export default function Home() {
 
           {/* EE9: Secret /void link hint when zoomed to max */}
           {zoom >= 79 && (
-            <div style={{ position: 'absolute', bottom: '60px', right: '20px', fontSize: '10px', color: '#222', pointerEvents: 'none' }}>
+            <div style={{ position: 'absolute', bottom: '200px', right: '20px', fontSize: '10px', color: '#222', pointerEvents: 'none' }}>
               try /void
             </div>
+          )}
+
+          {/* Minimap */}
+          <Minimap
+            pixelMap={pixelMap}
+            zoom={zoom}
+            offset={offset}
+            canvasSize={canvasSize}
+            onNavigate={(x, y) => {
+              const W = canvasSize.w, H = canvasSize.h
+              setZoom(zoom)
+              setOffset({ x: W / 2 - x * zoom, y: H / 2 - y * zoom })
+            }}
+          />
+
+          {/* Share button — top right of canvas */}
+          {selectedCoord && selectedPixel && (
+            <button
+              onClick={() => {
+                const url = `${window.location.origin}/?inspect=${selectedCoord[0]},${selectedCoord[1]}`
+                navigator.clipboard.writeText(url).then(() => showEasterMsg('🔗 Link copied to clipboard!', 2500))
+              }}
+              style={{
+                position: 'absolute', top: '12px', right: '12px',
+                background: 'rgba(5,5,8,0.9)', border: '1px solid #2a2a3e',
+                color: '#888', padding: '6px 12px', cursor: 'pointer',
+                fontFamily: "'Space Mono', monospace", fontSize: '10px',
+                borderRadius: '2px', letterSpacing: '0.06em',
+              }}
+            >
+              🔗 Share Pixel
+            </button>
           )}
         </div>
       </div>
